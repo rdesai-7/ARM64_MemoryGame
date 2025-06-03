@@ -15,6 +15,27 @@ void initialise ( ARM_STATE *state ) {
   state->output = stdout;
 }
 
+// Read binary file
+bool readBinary ( ARM_STATE *state, const char *filename ) {
+    FILE *file = fopen(filename, "rb");
+    if (file == NULL) {
+      fprintf(stderr, "Error Opening File");
+      return false;
+    }
+    size_t nbytes_read =  fread(state->memory, 1, MEM_SIZE, file);
+
+    if (ferror(file) != 0) { //
+      fprintf(stderr, "Error Reading File");
+      fclose(file);
+      return false;
+  }
+
+  printf("We have read %zu bytes from file %s into memory", nbytes_read, filename);
+
+  fclose(file);
+  return true;
+}
+
 int main(int argc, char *argv[]) {
   if (argc < 2) { 
     fprintf(stderr, "Usage: ./emulate <binary_file> [output_file]\n");
