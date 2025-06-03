@@ -15,6 +15,13 @@ void initialise ( ARM_STATE *state ) {
   state->output = stdout;
 }
 
+void fetch (ARM_STATE *state) {
+  if (state->pc > MEM_SIZE) {
+     fprintf(stderr, "Error: PC 0x%08x is out of bounds\n", state->pc);
+     //handle error
+  }
+}
+
 int main(int argc, char *argv[]) {
   if (argc < 2) { 
     fprintf(stderr, "Usage: ./emulate <binary_file> [output_file]\n");
@@ -45,6 +52,13 @@ int main(int argc, char *argv[]) {
   //read file into memory
 
   //fetch, decode, execute cycle
+  while (!state->halt_flag) {
+    //fetch
+    fetch(state);
+    //incrementpc
+    //decode
+    //execute
+  }
 
   //print final state
 
