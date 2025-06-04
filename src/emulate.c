@@ -28,7 +28,7 @@ void fetch (ARM_STATE *state) {
                       (state->memory[state->pc + 2] << 16) |
                       (state->memory[state->pc + 1] << 8) |
                       (state->memory[state->pc]);
-  if (instruction == HALT_INSTRUCTION) {
+  if (state->instruction == HALT_INSTRUCTION) {
     state->halt_flag = true;
   }
 }
@@ -40,10 +40,10 @@ void incrementPC (ARM_STATE *state) {
 //DECODE FUNCTIONS
 void decodeDPImmediate ( DECODED_INSTR *decoded, uint32_t instr ) {
   //check opi to see if arithmetic or wide move
-  decoded->sf = get_bits(instr, 31, 31)
-  decoded->opc = get_bits(instr, 30, 29)
-  decoded->opi = get_bits(instr, 25, 23)
-  decoded->rd = get_bits(instr, 4, 0)
+  decoded->sf = get_bits(instr, 31, 31);
+  decoded->opc = get_bits(instr, 30, 29);
+  decoded->opi = get_bits(instr, 25, 23);
+  decoded->rd = get_bits(instr, 4, 0);
 }
 
 void decodeDPRegister ( DECODED_INSTR *decoded, uint32_t instruction ) {
@@ -53,7 +53,7 @@ void decodeDPRegister ( DECODED_INSTR *decoded, uint32_t instruction ) {
 void decodeLoadStore ( DECODED_INSTR *decoded, uint32_t instruction ) {}
 void decodeBranch ( DECODED_INSTR *decoded, uint32_t instruction ) {}
 
-instr_type getInstructionType (uint32t instr) {
+instr_type getInstructionType (uint32_t instr) {
   if (get_bits(instr, 28, 26) == 0x4) {
     return DP_IMMEDIATE;
   } else if (get_bits(instr, 27, 5) == 0x5) {
@@ -73,10 +73,10 @@ uint32_t get_bits(uint32_t source, int start_bit, int end_bit) {
 }
 
 void decode (ARM_STATE *state) {
-  uint32t instruction = state->instruction;
+  uint32_t instruction = state->instruction;
   DECODED_INSTR *decoded = state->decoded;
   if (instruction == HALT_INSTRUCTION) {
-    continue;
+    return;
   } else {
     instr_type type = getInstructionType(instruction);
     func_decode decodeFunctions[] = {decodeDPImmediate, decodeDPRegister, decodeLoadStore, decodeBranch};
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
   ARM_STATE state;
   initialise(&state);
 
-  if (state == NULL) {
+  if (&state == NULL) {
     return EXIT_FAILURE; //some sort of initialisation failure
   }
 
@@ -148,11 +148,11 @@ int main(int argc, char *argv[]) {
   //read file into memory
 
   //fetch, decode, execute cycle
-  while (!state->halt_flag) {
-    fetch(state);
-    incrementPC(state);
+  while (!state.halt_flag) {
+    fetch(&state);
+    incrementPC(&state);
     //decode
-    decode(state);
+    decode(&state);
     //execute
   }
 
