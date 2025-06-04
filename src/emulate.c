@@ -3,6 +3,13 @@
 #include <stdint.h>
 #include "emulator_state.h"
 
+//Helper function to extract bits
+uint32_t get_bits(uint32_t source, int start_bit, int end_bit) {
+    int length = start_bit - end_bit + 1;
+    uint32_t mask = (1U << length) - 1;
+    return (source >> end_bit) & mask;
+}
+
 void initialise ( ARM_STATE *state ) {
   memset(state->memory, 0, MEM_SIZE);
   memset(state->registers, 0, sizeof(state->registers));
@@ -65,12 +72,7 @@ instr_type getInstructionType (uint32_t instr) {
   }
 }
 
-//Helper function to extract bits
-uint32_t get_bits(uint32_t source, int start_bit, int end_bit) {
-    int length = start_bit - end_bit + 1;
-    uint32_t mask = (1U << length) - 1;
-    return (source >> end_bit) & mask;
-}
+
 
 void decode (ARM_STATE *state) {
   uint32_t instruction = state->instruction;
