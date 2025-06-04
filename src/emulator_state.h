@@ -26,8 +26,19 @@ typedef struct {
     uint64_t registers[NUM_GPR];
     uint64_t pc;
     uint32_t instruction;
+    instr_type instruction_type;
     PSTATE_Flags pstate;
     bool halt_flag;
     FILE *output;
 } ARM_STATE;
 
+//Decode function pointers
+typdef void (*func_decode) (*state);
+
+//Instruction Types
+typedef enum {
+    DP_IMMEDIATE,
+    DP_REGISTER,
+    LOAD_STORE,
+    BRANCH
+} instr_type;
