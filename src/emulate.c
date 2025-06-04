@@ -6,6 +6,7 @@
 void initialise ( ARM_STATE *state ) {
   memset(state->memory, 0, MEM_SIZE);
   memset(state->registers, 0, sizeof(state->registers));
+  memset(state->decoded, 0, sizeof(state->decoded));
   state->pc = 0x0;
   state->instruction = 0x0;
   state->instruction_type = 0x0;
@@ -36,10 +37,20 @@ void incrementPC (ARM_STATE *state) {
   state->pc += PC_INCREMENT;
 }
 
-void decodeDPImmediate ( ARM_STATE *state ) {}
-void decodeDPRegister ( ARM_STATE *state ) {}
-void decodeLoadStore ( ARM_STATE *state ) {}
-void decodeBranch (ARM_STATE *state ) {}
+void decodeDPImmediate ( DECODED_INSTR *decoded, uint32_t instr ) {
+  //check opi to see if arithmetic or wide move
+  decoded->sf = get_bits(instr, 31, 31)
+  decoded->opc = get_bits(instr, 30, 29)
+  decoded->opi = get_bits(instr, 25, 23)
+  decoded->rd = get_bits(instr, 4, 0)
+}
+
+void decodeDPRegister ( DECODED_INSTR *decoded, uint32_t instruction ) {
+  //check m for multiply
+  //check bit 24 for arithmetic/logic
+}
+void decodeLoadStore ( DECODED_INSTR *decoded, uint32_t instruction ) {}
+void decodeBranch ( DECODED_INSTR *decoded, uint32_t instruction ) {}
 
 instr_type getInstructionType (uint32t instr) {
   if (get_bits(instr, 28, 26) == 0x4) {
@@ -62,19 +73,16 @@ uint32_t get_bits(uint32_t source, int start_bit, int end_bit) {
 
 void decode (ARM_STATE *state) {
   uint32t instruction = state->instruction;
+  DECODED_INSTR *decoded = state->decoded;
   if (instruction == HALT_INSTRUCTION) {
     continue;
   } else {
     instr_type type = getInstructionType(instruction);
     func_decode decodeFunctions[] = {decodeDPImmediate, decodeDPRegister, decodeLoadStore, decodeBranch};
-    decodeFunctions[type](state);
+    decodeFunctions[type](decoded, instruction);
     state->instruction_type = type;
   }
 }
-
-//need a decoded instruction type
-//need to add it to state
-//need to initialise it
 
 // Read binary file
 bool readBinary ( ARM_STATE *state, const char *filename ) {
