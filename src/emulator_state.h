@@ -34,7 +34,10 @@ typedef struct {
 } ARM_STATE;
 
 //Decode function pointers
-typdef void (*func_decode) ( *DECODED_INSTR, uint32_t );
+typedef void (*func_decode) ( *DECODED_INSTR, uint32_t );
+
+//Execute function pointers
+typedef void (*func_execute) ( *ARM_STATE ) ;
 
 //Instruction Types
 typedef enum {

@@ -37,6 +37,7 @@ void incrementPC (ARM_STATE *state) {
   state->pc += PC_INCREMENT;
 }
 
+//DECODE FUNCTIONS
 void decodeDPImmediate ( DECODED_INSTR *decoded, uint32_t instr ) {
   //check opi to see if arithmetic or wide move
   decoded->sf = get_bits(instr, 31, 31)
@@ -83,6 +84,18 @@ void decode (ARM_STATE *state) {
     state->instruction_type = type;
   }
 }
+
+//EXECUTE FUNCTIONS
+void execute(ARM_STATE *state) {
+    func_execute executeFunctions[] = {executeDPImmediate, executeDPRegister, executeLoadStore, executeBranch};
+    executeFunctions[state->instruction_type](state);
+}
+
+void executeDPImmediate( ARM_STATE *state) {}
+void executeDPRegister( ARM_STATE *state) {}
+void executeLoadStore( ARM_STATE *state) {}
+void executeBranch( ARM_STATE *state) {}
+
 
 // Read binary file
 bool readBinary ( ARM_STATE *state, const char *filename ) {
