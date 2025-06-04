@@ -110,6 +110,8 @@ void executeDPImmediate( ARM_STATE *state) {
     }
   } else if (dec_instr.opi == 0x5) {
     // Wide Move
+    dec_instr.hw = get_bits(instr, 22, 21);
+    dec_instr.imm16 = get_bits(instr, 20, 5);
     
   }
 }
