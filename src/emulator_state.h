@@ -92,8 +92,10 @@ typedef struct {
 //Execute function pointers
 typedef void (*func_execute) ( ARM_STATE *state ) ;
 
-
-
+//Function definitions
+uint32_t get_bits( uint32_t source, int start_bit, int end_bit );
 uint64_t get_reg_val(ARM_STATE *state, uint8_t reg_id, bool is_64_bit);
+void set_reg_val(ARM_STATE *state, uint8_t reg_id, uint64_t value, bool is_64_bit);
+instr_type getInstructionType (uint32_t instr);
 
 #endif

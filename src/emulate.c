@@ -78,7 +78,6 @@ void incrementPC (ARM_STATE *state) {
   state->pc += PC_INCREMENT;
 }
 
-
 instr_type getInstructionType (uint32_t instr) {
   if (get_bits(instr, 28, 26) == 0x4) {
     return DP_IMMEDIATE;
