@@ -42,13 +42,15 @@ typedef struct {
     uint8_t hw;
     uint32_t imm16;
 
+    bool M;
     uint8_t opr;
     uint8_t rm;
 
     uint8_t shift; //arithmetic+logical
     bool N; //logical only
-
-    bool x;
+    
+    uint8_t operand;
+    bool x; //for multiply
     uint8_t ra;
 
     bool L;
