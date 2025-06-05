@@ -18,6 +18,7 @@ void decodeDPImmediate ( DECODED_INSTR *decoded, uint32_t instr ) {
   } else if (decoded.opi == 0x5) {
     decoded->hw    = get_bits(instr, 22, 21);
     decoded->imm16 = get_bits(instr, 20, 5);
+    
   }
 }
 
