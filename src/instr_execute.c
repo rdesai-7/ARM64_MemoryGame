@@ -156,7 +156,21 @@ void executeLoadStore( ARM_STATE *state);
 void executeBranch( ARM_STATE *state) {
     // dont use instruction, use 'decoded' for everything
     DECODED_INSTR dec_instr = state->decoded;
-    
+    switch (dec_instr.branch_type) {
+        case UNCOND:
+            int32_t simm26_32 = (int32_t)(dec_instr.simm26 << 6) >> 6;
+            int64_t offset = (int64_t)simm26_32 << 2;
+            state->pc += offset;
+            break;
+
+        case REG:
+
+        case COND:
+
+        default:
+            break;
+
+    }
 
     // if unconditional
 }
