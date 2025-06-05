@@ -62,21 +62,12 @@ void execute(ARM_STATE *state) {
     executeFunctions[state->instruction_type](state);
 }
 
-//decoded instructions should not be changed or modified here
-//e.g. lines77-79 done in the decode function
-//execute should just take the decoded instruction and deal with it
-//discuss and change
 void executeDPImmediate( ARM_STATE *state) {
-    uint32_t instr = state->instruction;
     DECODED_INSTR dec_instr = state->decoded;
-    decodeDPImmediate(&dec_instr, instr);
     bool is_64_bit = dec_instr.sf;
 
   // Check if it is arithmetic or wide move
   if (dec_instr.opi == 0x2) {
-    dec_instr.sh = get_bits(instr, 22, 22);
-    dec_instr.imm12 = get_bits(instr, 21, 10);
-    dec_instr.rn = get_bits(instr, 9, 5);
     if (dec_instr.sh == 1) {
       dec_instr.imm12 <<= 12;
     }
@@ -117,8 +108,6 @@ void executeDPImmediate( ARM_STATE *state) {
     }
   } else if (dec_instr.opi == 0x5) {
     // Wide Move
-    dec_instr.hw = get_bits(instr, 22, 21);
-    dec_instr.imm16 = get_bits(instr, 20, 5);
 
     if (is_64_bit == 0) {
         if (!(dec_instr.hw == 0x0 || dec_instr.hw == 0x1)) {
