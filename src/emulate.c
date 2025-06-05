@@ -6,10 +6,42 @@
 #include "instr_execute.h"
 
 //Helper function to extract bits
-uint32_t get_bits(uint32_t source, int start_bit, int end_bit) {
+uint32_t get_bits( uint32_t source, int start_bit, int end_bit ) {
     int length = start_bit - end_bit + 1;
     uint32_t mask = (1U << length) - 1;
     return (source >> end_bit) & mask;
+}
+
+uint64_t get_reg_val(ARM_STATE *state, uint8_t reg_id, bool is_64_bit) {
+    if (reg_id == NUM_GPR) {
+        return 0;
+    }
+    if (reg_id > NUM_GPR) {
+        fprintf(stderr, "Index out of bounds %u for read.\n", reg_id);
+        return 0;
+    }
+
+    if (is_64_bit) { 
+        return state->registers[reg_id];
+    } else {
+        return (uint32_t)state->registers[reg_id];
+    }
+}
+
+void set_reg_val(ARM_STATE *state, uint8_t reg_id, uint64_t value, bool is_64_bit) {
+    if (reg_id == NUM_GPR) { // Writes to Zero Register are ignored
+        return;
+    }
+    if (reg_id > NUM_GPR) {
+        fprintf(stderr, "Index out of bounds %u for write.\n", reg_id);
+        return; 
+    }
+
+    if (is_64_bit) {
+        state->registers[reg_id] = value;
+    } else {
+        state->registers[reg_id] = (uint64_t)((uint32_t)value); // Zeros upper bits
+    }
 }
 
 void initialise ( ARM_STATE *state ) {

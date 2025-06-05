@@ -105,6 +105,8 @@ void executeDPImmediate( ARM_STATE *state) {
     }
     //IMPLEMENT SET REGISTER VALUE FUNCTION
 
+    set_reg_val(&state, dec_instr.rd, result, is_64_bit);
+
     // Updating pstate if needed
     if (update_flags) {
         update_pstate_arith( &state,  rn, imm12, result, is_sub, is_64_bit );
@@ -132,19 +134,22 @@ void executeDPImmediate( ARM_STATE *state) {
             new_rd_val = ~((uint32_t)op);
         }
         // SET REGISTER VALUE
+        set_reg_val(&state, dec_instr.rd, new_rd_val, is_64_bit);
         break;
     case 0x2:
         uint64_t op = (uint64_t)dec_instr.imm16 << sh_amt;
         // PUT OPERAND IN REGISTER
+        set_reg_val(&state, dec_instr.rd, op, is_64_bit);
         break;
     case 0x3:
         //GET CURRENT VALUE OF RD REGISTER
-        uint64_t og_rd_val;
+        uint64_t og_rd_val = get_reg_val(&state, dec_instr.rd, is_64_bit);
         uint64_t mask = ~((uint64_t)0xFFFF << sh_amt); // Creates a mask of 0s to clear the required bits 
         og_rd_val &= mask;
         uint64_t op = (uint64_t)dec_instr.imm16 << sh_amt;
         uint64_t new_rd_val = og_rd_val | op;
         // SET REGISTER VALUE
+        set_reg_val( &state, dec_instr.rd, new_rd_val, is_64_bit );
     default:
         break;
     }
