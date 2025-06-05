@@ -57,11 +57,6 @@ void update_pstate_arith( ARM_STATE *state, uint64_t operand1, uint64_t operand2
 }
 
 //EXECUTE FUNCTIONS
-void execute(ARM_STATE *state) {
-    func_execute executeFunctions[] = {executeDPImmediate, executeDPRegister, executeLoadStore, executeBranch};
-    executeFunctions[state->instruction_type](state);
-}
-
 void executeDPImmediate( ARM_STATE *state) {
     DECODED_INSTR dec_instr = state->decoded;
     bool is_64_bit = dec_instr.sf;
@@ -149,9 +144,8 @@ void executeDPImmediate( ARM_STATE *state) {
     }
 }
 
-// void executeDPRegister( ARM_STATE *state);
-// void executeLoadStore( ARM_STATE *state);
-
+void executeDPRegister( ARM_STATE *state);
+void executeLoadStore( ARM_STATE *state);
 
 void executeBranch( ARM_STATE *state) {
     // dont use instruction, use 'decoded' for everything
@@ -207,4 +201,12 @@ bool check_branch_cond(uint8_t cond, PSTATE_Flags pstate){
         default:
             break;
     }
+}
+
+void execute(ARM_STATE *state) {
+    if (state->halt_flag) {
+        return;
+    }
+    func_execute executeFunctions[] = {executeDPImmediate, executeDPRegister, executeLoadStore, executeBranch};
+    executeFunctions[state->instruction_type](state);
 }

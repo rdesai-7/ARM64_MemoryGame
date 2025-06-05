@@ -14,7 +14,6 @@
 #define HALT_INSTRUCTION 0x8a000000
 #define PC_INCREMENT 0x4
 
-
 // Struct for PSTATE register
 typedef struct {
     bool N; // Negative
@@ -94,10 +93,6 @@ typedef struct {
     bool halt_flag;
     FILE *output;
 } ARM_STATE;
-
-
-//Execute function pointers
-typedef void (*func_execute) ( ARM_STATE *state ) ;
 
 //Function definitions
 uint32_t get_bits( uint32_t source, int start_bit, int end_bit );
