@@ -12,7 +12,10 @@ void update_pstate_arith( ARM_STATE *state, uint64_t operand1, uint64_t operand2
 
 //Execute functions
 extern void execute(ARM_STATE *state);
+
 extern void executeDPImmediate( ARM_STATE *state);
 extern void executeDPRegister( ARM_STATE *state);
 extern void executeLoadStore( ARM_STATE *state);
 extern void executeBranch( ARM_STATE *state);
+
+extern bool check_branch_cond(uint8_t cond, PSTATE_Flags pstate);
