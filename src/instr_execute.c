@@ -63,98 +63,91 @@ void execute(ARM_STATE *state) {
 }
 
 void executeDPImmediate( ARM_STATE *state) {
-    uint32_t instr = state->instruction;
     DECODED_INSTR dec_instr = state->decoded;
-    decodeDPImmediate(&dec_instr, instr);
     bool is_64_bit = dec_instr.sf;
 
-  // Check if it is arithmetic or wide move
-  if (dec_instr.opi == 0x2) {
-    dec_instr.sh = get_bits(instr, 22, 22);
-    dec_instr.imm12 = get_bits(instr, 21, 10);
-    dec_instr.rn = get_bits(instr, 9, 5);
-    if (dec_instr.sh == 1) {
-      dec_instr.imm12 <<= 12;
-    }
-
-    uint64_t result = 0;
-    bool update_flags = false;
-    bool is_sub = false;
-    uint64_t rn = dec_instr.rn;
-    uint64_t imm12 = dec_instr.imm12;
-
-    switch (dec_instr.opc) {
-    case 0x0:
-      result = rn + imm12;
-      break;
-    case 0x1:
-      result = rn + imm12;
-      update_flags = true;
-      break;
-    case 0x2:
-      result = rn - imm12;
-      is_sub = true;
-      break;
-    case 0x3:
-      result = rn - imm12;
-      is_sub = true;
-      update_flags = true;
-      break;
-    default:
-      break;
-    }
-    //IMPLEMENT SET REGISTER VALUE FUNCTION
-
-    set_reg_val(&state, dec_instr.rd, result, is_64_bit);
-
-    // Updating pstate if needed
-    if (update_flags) {
-        update_pstate_arith( &state,  rn, imm12, result, is_sub, is_64_bit );
-    }
-  } else if (dec_instr.opi == 0x5) {
-    // Wide Move
-    dec_instr.hw = get_bits(instr, 22, 21);
-    dec_instr.imm16 = get_bits(instr, 20, 5);
-
-    if (is_64_bit == 0) {
-        if (!(dec_instr.hw == 0x0 || dec_instr.hw == 0x1)) {
-             fprintf(stderr, "Invalid opcode for 32 bit register");
-             return;
-    }
-    
-    int sh_amt = dec_instr.hw * SHIFT_CONSTANT;
-    uint64_t op = (uint64_t)dec_instr.imm16 << sh_amt;
-    uint64_t new_rd_val;
-
-    switch (dec_instr.opc) {
-    case 0x0:
-        if (is_64_bit) {
-            new_rd_val = ~op;
-        } else {// for 32 bit
-            new_rd_val = ~((uint32_t)op);
+    // Check if it is arithmetic or wide move
+    if (dec_instr.opi == 0x2) {
+        if (dec_instr.sh == 1) {
+        dec_instr.imm12 <<= 12;
         }
-        // SET REGISTER VALUE
-        set_reg_val(&state, dec_instr.rd, new_rd_val, is_64_bit);
+
+        uint64_t result = 0;
+        bool update_flags = false;
+        bool is_sub = false;
+        uint64_t rn = dec_instr.rn;
+        uint64_t imm12 = dec_instr.imm12;
+
+        switch (dec_instr.opc) {
+        case 0x0:
+        result = rn + imm12;
         break;
-    case 0x2:
-        // PUT OPERAND IN REGISTER
-        set_reg_val(&state, dec_instr.rd, op, is_64_bit);
+        case 0x1:
+        result = rn + imm12;
+        update_flags = true;
         break;
-    case 0x3:
-        //GET CURRENT VALUE OF RD REGISTER
-        uint64_t og_rd_val = get_reg_val(&state, dec_instr.rd, is_64_bit);
-        uint64_t mask = ~((uint64_t)0xFFFF << sh_amt); // Creates a mask of 0s to clear the required bits 
-        og_rd_val &= mask;
-        new_rd_val = og_rd_val | op;
-        // SET REGISTER VALUE
-        set_reg_val( &state, dec_instr.rd, new_rd_val, is_64_bit );
-    default:
+        case 0x2:
+        result = rn - imm12;
+        is_sub = true;
         break;
+        case 0x3:
+        result = rn - imm12;
+        is_sub = true;
+        update_flags = true;
+        break;
+        default:
+        break;
+        }
+        //IMPLEMENT SET REGISTER VALUE FUNCTION
+
+        set_reg_val(&state, dec_instr.rd, result, is_64_bit);
+
+        // Updating pstate if needed
+        if (update_flags) {
+            update_pstate_arith( &state,  rn, imm12, result, is_sub, is_64_bit );
+        }
+
+    } else if (dec_instr.opi == 0x5) {
+        // Wide Move
+
+        if (is_64_bit == 0) {
+            if (!(dec_instr.hw == 0x0 || dec_instr.hw == 0x1)) {
+                fprintf(stderr, "Invalid opcode for 32 bit register");
+                return;
+            }
+        }
+        
+        int sh_amt = dec_instr.hw * SHIFT_CONSTANT;
+        uint64_t op = (uint64_t)dec_instr.imm16 << sh_amt;
+        uint64_t new_rd_val;
+
+        switch (dec_instr.opc) {
+        case 0x0:
+            if (is_64_bit) {
+                new_rd_val = ~op;
+            } else {// for 32 bit
+                new_rd_val = ~((uint32_t)op);
+            }
+            // SET REGISTER VALUE
+            set_reg_val(&state, dec_instr.rd, new_rd_val, is_64_bit);
+            break;
+        case 0x2:
+            // PUT OPERAND IN REGISTER
+            set_reg_val(&state, dec_instr.rd, op, is_64_bit);
+            break;
+        case 0x3:
+            //GET CURRENT VALUE OF RD REGISTER
+            uint64_t og_rd_val = get_reg_val(&state, dec_instr.rd, is_64_bit);
+            uint64_t mask = ~((uint64_t)0xFFFF << sh_amt); // Creates a mask of 0s to clear the required bits 
+            og_rd_val &= mask;
+            new_rd_val = og_rd_val | op;
+            // SET REGISTER VALUE
+            set_reg_val( &state, dec_instr.rd, new_rd_val, is_64_bit );
+        default:
+            break;
+        }
     }
-  }
 }
-
-
 
 void executeDPRegister( ARM_STATE *state);
 void executeLoadStore( ARM_STATE *state);
