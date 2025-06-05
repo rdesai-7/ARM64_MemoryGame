@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "emulator_state.h"
+#include "instr_decode.h"
+#include "instr_execute.h"
 
 //Helper function to extract bits
 uint32_t get_bits(uint32_t source, int start_bit, int end_bit) {
@@ -13,7 +15,7 @@ uint32_t get_bits(uint32_t source, int start_bit, int end_bit) {
 void initialise ( ARM_STATE *state ) {
   memset(state->memory, 0, MEM_SIZE);
   memset(state->registers, 0, sizeof(state->registers));
-  memset(state->decoded, 0, sizeof(state->decoded));
+  memset(&state->decoded, 0, sizeof(state->decoded));
   state->pc = 0x0;
   state->instruction = 0x0;
   state->instruction_type = 0x0;
@@ -44,21 +46,6 @@ void incrementPC (ARM_STATE *state) {
   state->pc += PC_INCREMENT;
 }
 
-//DECODE FUNCTIONS
-void decodeDPImmediate ( DECODED_INSTR *decoded, uint32_t instr ) {
-  //check opi to see if arithmetic or wide move
-  decoded->sf = get_bits(instr, 31, 31);
-  decoded->opc = get_bits(instr, 30, 29);
-  decoded->opi = get_bits(instr, 25, 23);
-  decoded->rd = get_bits(instr, 4, 0);
-}
-
-void decodeDPRegister ( DECODED_INSTR *decoded, uint32_t instruction ) {
-  //check m for multiply
-  //check bit 24 for arithmetic/logic
-}
-void decodeLoadStore ( DECODED_INSTR *decoded, uint32_t instruction ) {}
-void decodeBranch ( DECODED_INSTR *decoded, uint32_t instruction ) {}
 
 instr_type getInstructionType (uint32_t instr) {
   if (get_bits(instr, 28, 26) == 0x4) {
@@ -71,33 +58,6 @@ instr_type getInstructionType (uint32_t instr) {
     return LOAD_STORE;
   }
 }
-
-
-
-void decode (ARM_STATE *state) {
-  uint32_t instruction = state->instruction;
-  DECODED_INSTR *decoded = state->decoded;
-  if (instruction == HALT_INSTRUCTION) {
-    return;
-  } else {
-    instr_type type = getInstructionType(instruction);
-    func_decode decodeFunctions[] = {decodeDPImmediate, decodeDPRegister, decodeLoadStore, decodeBranch};
-    decodeFunctions[type](decoded, instruction);
-    state->instruction_type = type;
-  }
-}
-
-//EXECUTE FUNCTIONS
-void execute(ARM_STATE *state) {
-    func_execute executeFunctions[] = {executeDPImmediate, executeDPRegister, executeLoadStore, executeBranch};
-    executeFunctions[state->instruction_type](state);
-}
-
-void executeDPImmediate( ARM_STATE *state) {}
-void executeDPRegister( ARM_STATE *state) {}
-void executeLoadStore( ARM_STATE *state) {}
-void executeBranch( ARM_STATE *state) {}
-
 
 // Read binary file
 bool readBinary ( ARM_STATE *state, const char *filename ) {
