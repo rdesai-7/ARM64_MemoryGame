@@ -129,7 +129,7 @@ void printBinary ( ARM_STATE *state ) {
                            (state->memory[state->pc + 1] << 8)  |
                            (state->memory[state->pc]);
     if (nextMemWord != 0) {
-      fprintf(state->output, "0x%08x: 0x%08x\n", i, nextMemWord)
+      fprintf(state->output, "0x%08x: 0x%08x\n", i, nextMemWord);
     }
   }
 }
