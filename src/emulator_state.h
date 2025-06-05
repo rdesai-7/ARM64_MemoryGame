@@ -70,6 +70,8 @@ typedef struct {
 
     uint32_t simm26;
     uint8_t cond;
+
+    uint8_t branch_type;
     
 } DECODED_INSTR; 
 

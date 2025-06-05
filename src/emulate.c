@@ -62,7 +62,7 @@ void initialise ( ARM_STATE *state ) {
 void fetch (ARM_STATE *state) {
   //check if pc is within memory size
   if (state->pc > MEM_SIZE) {
-     fprintf(stderr, "Error: PC 0x%08x is out of bounds\n", state->pc);
+     fprintf(stderr, "Error: PC 0x%08lx is out of bounds\n", state->pc);
   }
   //get instruction
   state->instruction = (state->memory[state->pc + 3] << 24) |
@@ -125,9 +125,9 @@ int main(int argc, char *argv[]) {
   ARM_STATE state;
   initialise(&state);
 
-  if (&state == NULL) {
-    return EXIT_FAILURE; //some sort of initialisation failure
-  }
+  // if (state == NULL) {
+  //  return EXIT_FAILURE; //some sort of initialisation failure
+  // }
 
   //edit output based on optional file
   if (output_filename != NULL) {
@@ -140,6 +140,7 @@ int main(int argc, char *argv[]) {
   } 
 
   //read file into memory
+  readBinary(&state, binary_filename);
 
   //fetch, decode, execute cycle
   while (!state.halt_flag) {
