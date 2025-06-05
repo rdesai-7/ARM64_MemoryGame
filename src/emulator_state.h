@@ -60,6 +60,7 @@ typedef struct {
     uint8_t xn;
     uint8_t rt;
 
+    //for addressing modes 
     uint8_t xm;
     uint16_t simm9;
     bool I;

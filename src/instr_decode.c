@@ -21,7 +21,7 @@ void decodeDPImmediate ( DECODED_INSTR *decoded, uint32_t instr ) {
   }
 }
 
-void decodeDPRegister ( DECODED_INSTR *decoded, uint32_t instruction ) {
+void decodeDPRegister ( DECODED_INSTR *decoded, uint32_t instr ) {
   decoded->sf  = get_bits(instr, 31, 31);
   decoded->opc = get_bits(instr, 30, 29);
   decoded->M   = get_bits(instr, 28, 28);
@@ -43,8 +43,39 @@ void decodeDPRegister ( DECODED_INSTR *decoded, uint32_t instruction ) {
 }
 
 //potentially have an instr_subtype field in decoded instruction to avoid checking again in execute?
-void decodeLoadStore ( DECODED_INSTR *decoded, uint32_t instruction ) {}
-void decodeBranch ( DECODED_INSTR *decoded, uint32_t instruction ) {}
+
+void decodeLoadStore ( DECODED_INSTR *decoded, uint32_t instr ) {
+  decoded->sf = get_bits(instr, 30, 30);
+  decoded->rt = get_bits(instr, 4, 0);
+  //check if sdt or load literal
+  if (get_bits(instr, 31, 31)) { //SDT
+    decoded->U      = get_bits(instr, 24, 24);
+    decoded->L      = get_bits(instr, 22, 22);
+    decoded->offset = get_bits(instr, 21, 10); //offset can be decomposed in execute based on addressing mode?
+    decoded->xn     = get_bits(instr, 9, 5);
+  } else { //Load Literal
+    decoded->simm19 = get_bits(instr, 23, 5);
+  }
+}
+
+void decodeBranch ( DECODED_INSTR *decoded, uint32_t instr ) {
+  uint8_t branch_type = get_bits(instr, 31, 29);
+  switch (branch_type) {
+    case 0x0: //unconditional
+      decoded->simm26 = get_bits(instr, 25, 0);
+      break;
+    case 0x6: //register
+      decoded->xn = get_bits(instr, 9, 5);
+      break;
+    case 0x2: //conditional
+      decoded->simm19 = get_bits(instr, 23, 5);
+      decoded->cond = get_bits(instr, 3, 0);
+      break;
+    default:
+      break;
+  }
+  //these branch types could be turned into an enum + stored in decoded?
+}
 
 void decode (ARM_STATE *state) {
   uint32_t instruction = state->instruction;
