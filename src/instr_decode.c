@@ -77,13 +77,12 @@ void decodeBranch ( DECODED_INSTR *decoded, uint32_t instr ) {
     default:
       break;
   }
-  //these branch types could be turned into an enum + stored in decoded?
 }
 
 void decode (ARM_STATE *state) {
   uint32_t instruction = state->instruction;
   DECODED_INSTR decoded = state->decoded;
-  if (instruction == HALT_INSTRUCTION) {
+  if (state->halt_flag) {
     return;
   } else {
     instr_type type = getInstructionType(instruction);

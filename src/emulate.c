@@ -168,9 +168,7 @@ int main(int argc, char *argv[]) {
   while (!state.halt_flag) {
     fetch(&state);
     incrementPC(&state);
-    //decode
     decode(&state);
-    //execute
     execute(&state);
     // rohan d comment: i think section 1.2 on spec suggests incrementing PC at the end of everything
   }
