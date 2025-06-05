@@ -111,6 +111,29 @@ bool readBinary ( ARM_STATE *state, const char *filename ) {
   return true;
 }
 
+void printBinary ( ARM_STATE *state ) {
+  fprintf(state->output, "Registers:\n");
+  for (int i = 0; i < NUM_GPR; i++) {
+    fprintf(state->output, "X%02d    = %016lx\n", i, state->registers[i]);
+  }
+  fprintf(state->output, "PC     = %016lx\n", state->pc);
+  fprintf(state->output, "PSTATE : %c%c%c%c\n",
+    state->pstate.N ? 'N' : '-',
+    state->pstate.Z ? 'Z' : '-',
+    state->pstate.C ? 'C' : '-',
+    state->pstate.V ? 'V' : '-');
+  fprintf(state->output, "Non-zero memory:\n");
+  for (int i = 0; i < MEM_SIZE / 4; i += 4) {
+    uint32_t nextMemWord = (state->memory[state->pc + 3] << 24) |
+                           (state->memory[state->pc + 2] << 16) |
+                           (state->memory[state->pc + 1] << 8)  |
+                           (state->memory[state->pc]);
+    if (nextMemWord != 0) {
+      fprintf(state->output, "0x%08x: 0x%08x\n", i, nextMemWord)
+    }
+  }
+}
+
 int main(int argc, char *argv[]) {
   if (argc < 2) { 
     fprintf(stderr, "Usage: ./emulate <binary_file> [output_file]\n");
@@ -150,10 +173,10 @@ int main(int argc, char *argv[]) {
     //execute
     execute(&state);
     // rohan d comment: i think section 1.2 on spec suggests incrementing PC at the end of everything
-
   }
 
-  //print final state
+  //print final state (into stdout or output file)
+  printBinary(&state);
 
   return EXIT_SUCCESS;
 }
