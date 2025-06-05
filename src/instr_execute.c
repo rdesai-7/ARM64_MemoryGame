@@ -123,11 +123,11 @@ void executeDPImmediate( ARM_STATE *state) {
     }
     
     int sh_amt = dec_instr.hw * SHIFT_CONSTANT;
+    uint64_t op = (uint64_t)dec_instr.imm16 << sh_amt;
+    uint64_t new_rd_val;
 
     switch (dec_instr.opc) {
     case 0x0:
-        uint64_t op = (uint64_t)dec_instr.imm16 << sh_amt;
-        uint64_t new_rd_val;
         if (is_64_bit) {
             new_rd_val = ~op;
         } else {// for 32 bit
@@ -137,7 +137,6 @@ void executeDPImmediate( ARM_STATE *state) {
         set_reg_val(&state, dec_instr.rd, new_rd_val, is_64_bit);
         break;
     case 0x2:
-        uint64_t op = (uint64_t)dec_instr.imm16 << sh_amt;
         // PUT OPERAND IN REGISTER
         set_reg_val(&state, dec_instr.rd, op, is_64_bit);
         break;
@@ -146,8 +145,7 @@ void executeDPImmediate( ARM_STATE *state) {
         uint64_t og_rd_val = get_reg_val(&state, dec_instr.rd, is_64_bit);
         uint64_t mask = ~((uint64_t)0xFFFF << sh_amt); // Creates a mask of 0s to clear the required bits 
         og_rd_val &= mask;
-        uint64_t op = (uint64_t)dec_instr.imm16 << sh_amt;
-        uint64_t new_rd_val = og_rd_val | op;
+        new_rd_val = og_rd_val | op;
         // SET REGISTER VALUE
         set_reg_val( &state, dec_instr.rd, new_rd_val, is_64_bit );
     default:

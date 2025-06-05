@@ -1,5 +1,8 @@
 // header file for the state of the ARMV8 Machine
 
+#ifndef EMULATOR_STATE_H
+#define EMULATOR_STATE_H
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -87,3 +90,5 @@ typedef void (*func_execute) ( ARM_STATE *state ) ;
 
 
 uint64_t get_reg_val(ARM_STATE *state, uint8_t reg_id, bool is_64_bit);
+
+#endif
