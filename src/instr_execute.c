@@ -158,19 +158,53 @@ void executeBranch( ARM_STATE *state) {
     DECODED_INSTR dec_instr = state->decoded;
     switch (dec_instr.branch_type) {
         case UNCOND:
+            // sign extend simm26 
             int32_t simm26_32 = (int32_t)(dec_instr.simm26 << 6) >> 6;
             int64_t offset = (int64_t)simm26_32 << 2;
+            // add offset to PC
             state->pc += offset;
             break;
-
         case REG:
-
+            // set PC to 64-bit value from specified register
+            state->pc = get_reg_val(state,dec_instr.xn,true);
         case COND:
+            // sign extend simm19 
+            int32_t simm19_32 = (int32_t)(dec_instr.simm19 << 13) >> 13;
+            int64_t offset = (int64_t)simm19_32 << 2;
 
+            // add offset if cond is met
+            if (check_branch_cond(dec_instr.cond,state->pstate)){
+                state->pc += offset;
+            }
         default:
             break;
-
     }
+}
 
-    // if unconditional
+bool check_branch_cond(uint8_t cond, PSTATE_Flags pstate){
+    switch (cond){
+        case 0x0:
+            // check EQ
+            return (pstate.Z == 1);
+        case 0x1:
+            // check NE
+            return (pstate.Z == 0);
+        case 0xA:
+            // check GE
+            return (pstate.N == pstate.V);
+        case 0xB:
+            // check LT
+            return (pstate.N != pstate.V);
+        case 0xC:
+            // check GT
+            return (pstate.Z == 0 && pstate.N == pstate.V);
+        case 0xD:
+            // check LE
+            return !(pstate.Z == 0 && pstate.N == pstate.V);
+        case 0xE:
+            // AL: always true
+            return true;
+        default:
+            break;
+    }
 }
