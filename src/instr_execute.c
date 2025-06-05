@@ -62,6 +62,10 @@ void execute(ARM_STATE *state) {
     executeFunctions[state->instruction_type](state);
 }
 
+//decoded instructions should not be changed or modified here
+//e.g. lines77-79 done in the decode function
+//execute should just take the decoded instruction and deal with it
+//discuss and change
 void executeDPImmediate( ARM_STATE *state) {
     uint32_t instr = state->instruction;
     DECODED_INSTR dec_instr = state->decoded;
@@ -153,8 +157,6 @@ void executeDPImmediate( ARM_STATE *state) {
     }
   }
 }
-
-
 
 void executeDPRegister( ARM_STATE *state);
 void executeLoadStore( ARM_STATE *state);
