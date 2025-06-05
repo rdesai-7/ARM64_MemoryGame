@@ -27,6 +27,7 @@ void decode (ARM_STATE *state) {
     return;
   } else {
     instr_type type = getInstructionType(instruction);
+    // POTENTIALLY PASS POINTERS TO FUNCTION FOR EFFICIENCY 
     func_decode decodeFunctions[] = {decodeDPImmediate, decodeDPRegister, decodeLoadStore, decodeBranch};
     decodeFunctions[type](decoded, instruction);
     state->instruction_type = type;

@@ -158,4 +158,12 @@ void executeDPImmediate( ARM_STATE *state) {
 
 void executeDPRegister( ARM_STATE *state);
 void executeLoadStore( ARM_STATE *state);
-void executeBranch( ARM_STATE *state);
+
+
+void executeBranch( ARM_STATE *state) {
+    // dont use instruction, use 'decoded' for everything
+    DECODED_INSTR dec_instr = state->decoded;
+    
+
+    // if unconditional
+}
