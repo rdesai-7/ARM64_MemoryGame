@@ -149,8 +149,8 @@ void executeDPImmediate( ARM_STATE *state) {
     }
 }
 
-void executeDPRegister( ARM_STATE *state);
-void executeLoadStore( ARM_STATE *state);
+// void executeDPRegister( ARM_STATE *state);
+// void executeLoadStore( ARM_STATE *state);
 
 
 void executeBranch( ARM_STATE *state) {

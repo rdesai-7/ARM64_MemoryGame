@@ -36,7 +36,7 @@ typedef enum {
     UNCOND,
     REG,
     COND
-} branch_types
+} branch_types;
 
 //Decoded Instruction
 typedef struct {
@@ -78,7 +78,7 @@ typedef struct {
     uint32_t simm26;
     uint8_t cond;
 
-    branch_types branch type;
+    branch_types branch_type;
     
 } DECODED_INSTR; 
 

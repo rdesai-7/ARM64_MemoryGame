@@ -148,6 +148,7 @@ int main(int argc, char *argv[]) {
     //decode
     decode(&state);
     //execute
+    execute(&state);
     // rohan d comment: i think section 1.2 on spec suggests incrementing PC at the end of everything
 
   }
