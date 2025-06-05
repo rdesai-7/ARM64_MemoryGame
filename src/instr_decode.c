@@ -60,17 +60,20 @@ void decodeLoadStore ( DECODED_INSTR *decoded, uint32_t instr ) {
 }
 
 void decodeBranch ( DECODED_INSTR *decoded, uint32_t instr ) {
-  decoded->branch_type = get_bits(instr, 31, 29);
-  switch (decoded->branch_type) {
+  //decoded->branch_type = get_bits(instr, 31, 29);
+  switch (get_bits(instr, 31, 29)) {
     case 0x0: //unconditional
       decoded->simm26 = get_bits(instr, 25, 0);
+      decoded->branch_type = UNCOND;
       break;
     case 0x6: //register
       decoded->xn = get_bits(instr, 9, 5);
+      decoded->branch_type = REG;
       break;
     case 0x2: //conditional
       decoded->simm19 = get_bits(instr, 23, 5);
       decoded->cond = get_bits(instr, 3, 0);
+      decoded->branch_type = COND;
       break;
     default:
       break;
