@@ -23,7 +23,7 @@ void decodeDPImmediate ( DECODED_INSTR *decoded, uint32_t instr ) {
 
 void decodeDPRegister ( DECODED_INSTR *decoded, uint32_t instr ) {
   decoded->sf  = get_bits(instr, 31, 31);
-  decoded->opc = get_bits(instr, 30, 29);
+  decoded->opc = get_bits(instr, 30, 29); 
   decoded->M   = get_bits(instr, 28, 28);
   decoded->opr = get_bits(instr, 24, 21);
   decoded->rm  = get_bits(instr, 20, 16);
@@ -36,6 +36,7 @@ void decodeDPRegister ( DECODED_INSTR *decoded, uint32_t instr ) {
     decoded->ra = get_bits(instr, 14, 10);
   } else { //arith/logic
     decoded->shift = get_bits(instr, 23, 22);
+    decoded->operand = get_bits(instr, 15, 10);
     if ((decoded->opr >> 3) == 0) { //store N if logical
       decoded->N = get_bits(instr, 21, 21);
     }
