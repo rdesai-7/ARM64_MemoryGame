@@ -57,11 +57,16 @@ void update_pstate_arith( ARM_STATE *state, uint64_t operand1, uint64_t operand2
 }
 
 //EXECUTE FUNCTIONS
+void execute(ARM_STATE *state) {
+    func_execute executeFunctions[] = {executeDPImmediate, executeDPRegister, executeLoadStore, executeBranch};
+    executeFunctions[state->instruction_type](state);
+}
+
 void executeDPImmediate( ARM_STATE *state) {
     DECODED_INSTR dec_instr = state->decoded;
     bool is_64_bit = dec_instr.sf;
 
-    // Check if it is arithmetic or wide move
+    
     if (dec_instr.opi == 0x2) {
         if (dec_instr.sh == 1) {
         dec_instr.imm12 <<= 12;
@@ -95,11 +100,11 @@ void executeDPImmediate( ARM_STATE *state) {
         }
         //IMPLEMENT SET REGISTER VALUE FUNCTION
 
-        set_reg_val(state, dec_instr.rd, result, is_64_bit);
+        set_reg_val(&state, dec_instr.rd, result, is_64_bit);
 
         // Updating pstate if needed
         if (update_flags) {
-            update_pstate_arith( state,  rn, imm12, result, is_sub, is_64_bit );
+            update_pstate_arith( &state,  rn, imm12, result, is_sub, is_64_bit );
         }
 
     } else if (dec_instr.opi == 0x5) {
@@ -124,20 +129,20 @@ void executeDPImmediate( ARM_STATE *state) {
                 new_rd_val = ~((uint32_t)op);
             }
             // SET REGISTER VALUE
-            set_reg_val(state, dec_instr.rd, new_rd_val, is_64_bit);
+            set_reg_val(&state, dec_instr.rd, new_rd_val, is_64_bit);
             break;
         case 0x2:
             // PUT OPERAND IN REGISTER
-            set_reg_val(state, dec_instr.rd, op, is_64_bit);
+            set_reg_val(&state, dec_instr.rd, op, is_64_bit);
             break;
         case 0x3:
             //GET CURRENT VALUE OF RD REGISTER
-            uint64_t og_rd_val = get_reg_val(state, dec_instr.rd, is_64_bit);
+            uint64_t og_rd_val = get_reg_val(&state, dec_instr.rd, is_64_bit);
             uint64_t mask = ~((uint64_t)0xFFFF << sh_amt); // Creates a mask of 0s to clear the required bits 
             og_rd_val &= mask;
             new_rd_val = og_rd_val | op;
             // SET REGISTER VALUE
-            set_reg_val( state, dec_instr.rd, new_rd_val, is_64_bit );
+            set_reg_val( &state, dec_instr.rd, new_rd_val, is_64_bit );
         default:
             break;
         }
@@ -147,66 +152,11 @@ void executeDPImmediate( ARM_STATE *state) {
 void executeDPRegister( ARM_STATE *state);
 void executeLoadStore( ARM_STATE *state);
 
+
 void executeBranch( ARM_STATE *state) {
     // dont use instruction, use 'decoded' for everything
     DECODED_INSTR dec_instr = state->decoded;
-    switch (dec_instr.branch_type) {
-        case UNCOND:
-            // sign extend simm26 
-            int32_t simm26_32 = (int32_t)(dec_instr.simm26 << 6) >> 6;
-            int64_t offset = (int64_t)simm26_32 << 2;
-            // add offset to PC
-            state->pc += offset;
-            break;
-        case REG:
-            // set PC to 64-bit value from specified register
-            state->pc = get_reg_val(state,dec_instr.xn,true);
-        case COND:
-            // sign extend simm19 
-            int32_t simm19_32 = (int32_t)(dec_instr.simm19 << 13) >> 13;
-            int64_t offset = (int64_t)simm19_32 << 2;
+    
 
-            // add offset if cond is met
-            if (check_branch_cond(dec_instr.cond,state->pstate)){
-                state->pc += offset;
-            }
-        default:
-            break;
-    }
-}
-
-bool check_branch_cond(uint8_t cond, PSTATE_Flags pstate){
-    switch (cond){
-        case 0x0:
-            // check EQ
-            return (pstate.Z == 1);
-        case 0x1:
-            // check NE
-            return (pstate.Z == 0);
-        case 0xA:
-            // check GE
-            return (pstate.N == pstate.V);
-        case 0xB:
-            // check LT
-            return (pstate.N != pstate.V);
-        case 0xC:
-            // check GT
-            return (pstate.Z == 0 && pstate.N == pstate.V);
-        case 0xD:
-            // check LE
-            return !(pstate.Z == 0 && pstate.N == pstate.V);
-        case 0xE:
-            // AL: always true
-            return true;
-        default:
-            break;
-    }
-}
-
-void execute(ARM_STATE *state) {
-    if (state->halt_flag) {
-        return;
-    }
-    func_execute executeFunctions[] = {executeDPImmediate, executeDPRegister, executeLoadStore, executeBranch};
-    executeFunctions[state->instruction_type](state);
+    // if unconditional
 }
