@@ -145,10 +145,73 @@ void executeDPImmediate( ARM_STATE *state) {
 }
 
 void executeDPRegister( ARM_STATE *state);
-void executeLoadStore( ARM_STATE *state);
+
+
+void executeLoadStore( ARM_STATE *state) {
+    DECODED_INSTR dec_instr = state->decoded;
+    switch (dec_instr.loadstore_type) {
+        case SDT:
+            // sf, U, L, offset, xn, rt
+
+            uint64_t addr;
+            if (dec_instr.U == 1) {
+                // memory addressing: unsigned immediate offset
+                uint64_t uoffset;
+                if (sf) {
+                    uoffset = dec_instr.imm12 << 3;
+                } else {
+                    uoffset = dec_instr.imm12 << 2;
+                }
+                addr = dec_instr.xn + uoffset;
+            } else if (dec_instr.I == 1) {
+                // memory addressing: pre-indexed
+            } else if (dec_instr.I == 0) {
+                // memory addressing: post-indexed
+            }
+
+            if (dec_instr.L == 1) {
+                // load
+            } else {
+                // store
+            }
+
+        
+        case LOADLITERAL:
+            // sign extend simm19 
+            int32_t simm19_32 = (int32_t)(dec_instr.simm19 << 13) >> 13;
+            int64_t offset = (int64_t)simm19_32 << 2;
+            uint64_t start_address = state->pc + offset;
+
+            // load the value into rt
+            // TODO: MAKE BELOW CODE A HELPER FUNCTION. ie load_memory, store_memory functions similar to get/set_reg_val
+            if (sf) {
+                // target register is 64bit
+                uint64_t val = (state->memory[start_address + 7] << 64) |
+                    (state->memory[start_address + 6]) << 56|
+                    (state->memory[start_address + 5] << 48) |
+                    (state->memory[start_address + 4] << 40) |
+                    (state->memory[start_address + 3]) << 32 | 
+                    (state->memory[start_address + 2] << 16) |
+                    (state->memory[start_address + 1] << 8) |
+                    (state->memory[start_address]);
+            } else {
+                // target register is 32bit
+                uint32_t val = (state->memory[start_address + 3] << 24) |
+                    (state->memory[start_address + 2] << 16) |
+                    (state->memory[start_address + 1] << 8) |
+                    (state->memory[start_address]);
+            }
+            set_reg_val(state, dec_instr.rt, val, sf)
+        default:
+            break;
+    }
+
+}
+
+
+
 
 void executeBranch( ARM_STATE *state) {
-    // dont use instruction, use 'decoded' for everything
     DECODED_INSTR dec_instr = state->decoded;
     switch (dec_instr.branch_type) {
         case UNCOND:

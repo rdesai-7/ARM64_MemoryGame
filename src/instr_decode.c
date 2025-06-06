@@ -49,11 +49,13 @@ void decodeLoadStore ( DECODED_INSTR *decoded, uint32_t instr ) {
   decoded->rt = get_bits(instr, 4, 0);
   //check if sdt or load literal
   if (get_bits(instr, 31, 31)) { //SDT
+    decoded->loadstore_type = SDT;
     decoded->U      = get_bits(instr, 24, 24);
     decoded->L      = get_bits(instr, 22, 22);
     decoded->offset = get_bits(instr, 21, 10); //offset can be decomposed in execute based on addressing mode?
     decoded->xn     = get_bits(instr, 9, 5);
   } else { //Load Literal
+    decoded->loadstore_type = LOADLITERAL;
     decoded->simm19 = get_bits(instr, 23, 5);
   }
 }

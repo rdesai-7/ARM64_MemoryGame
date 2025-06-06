@@ -37,6 +37,12 @@ typedef enum {
     COND
 } branch_types;
 
+// Load Store Types
+typedef enum {
+    SDT,
+    LOADLITERAL
+} loadstore_types;
+
 //Decoded Instruction
 typedef struct {
     bool sf;
@@ -78,6 +84,7 @@ typedef struct {
     uint8_t cond;
 
     branch_types branch_type;
+    loadstore_types loadstore_type;
     
 } DECODED_INSTR; 
 
