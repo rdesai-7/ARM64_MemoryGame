@@ -151,7 +151,6 @@ void executeLoadStore( ARM_STATE *state) {
     DECODED_INSTR dec_instr = state->decoded;
     switch (dec_instr.loadstore_type) {
         case SDT:
-    
             uint64_t addr;
             switch (dec_instr.addr_mode) {
                 case U_OFFSET:
