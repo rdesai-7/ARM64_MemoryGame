@@ -114,7 +114,8 @@ void executeDPImmediate( ARM_STATE *state) {
         
         int sh_amt = dec_instr.hw * SHIFT_CONSTANT;
         uint64_t op = (uint64_t)dec_instr.imm16 << sh_amt;
-        uint64_t new_rd_val;
+        uint64_t new_rd_val = 0;
+        uint64_t og_rd_val = 0;
 
         switch (dec_instr.opc) {
         case 0x0:
@@ -132,7 +133,7 @@ void executeDPImmediate( ARM_STATE *state) {
             break;
         case 0x3:
             //GET CURRENT VALUE OF RD REGISTER
-            uint64_t og_rd_val = get_reg_val(state, dec_instr.rd, is_64_bit);
+            og_rd_val = get_reg_val(state, dec_instr.rd, is_64_bit);
             uint64_t mask = ~((uint64_t)0xFFFF << sh_amt); // Creates a mask of 0s to clear the required bits 
             og_rd_val &= mask;
             new_rd_val = og_rd_val | op;
@@ -144,16 +145,17 @@ void executeDPImmediate( ARM_STATE *state) {
     }
 }
 
-void executeDPRegister( ARM_STATE *state);
-
+void executeDPRegister( ARM_STATE *state) {}
 
 void executeLoadStore( ARM_STATE *state) {
     DECODED_INSTR dec_instr = state->decoded;
+    bool sf = dec_instr.sf;
+    uint64_t addr;
+    int64_t simm9;
     switch (dec_instr.loadstore_type) {
         case SDT:
-            uint64_t addr;
             switch (dec_instr.addr_mode) {
-                case U_OFFSET:
+                case U_OFFSET: {
                     uint64_t uoffset;
                     if (sf) {
                         uoffset = dec_instr.offset << 3;
@@ -162,15 +164,16 @@ void executeLoadStore( ARM_STATE *state) {
                     }
                     addr = get_reg_val(state,dec_instr.xn,true) + uoffset;
                     break;
+                }
                 case PRE_INDEXED:
                     // sign-extend simm9 to 64bit
-                    int64_t simm9 = (int64_t)((dec_instr.simm9 << 7) >> 7); 
+                    simm9 = (int64_t)((dec_instr.simm9 << 7) >> 7); 
                     addr = get_reg_val(state,dec_instr.xn,true)  + simm9;
                     set_reg_val(state,dec_instr.xn,addr,true);
                     break;
                 case POST_INDEXED:
                     addr = get_reg_val(state,dec_instr.xn,true);
-                    int64_t simm9 = (int64_t)((dec_instr.simm9 << 7) >> 7); 
+                    simm9 = (int64_t)((dec_instr.simm9 << 7) >> 7); 
                     set_reg_val(state,dec_instr.xn,addr+simm9,true);
                     break;
                 case REG_OFFSET:
@@ -190,7 +193,7 @@ void executeLoadStore( ARM_STATE *state) {
                 storeMemory(state, addr, sf, val);
             }
             break;
-        case LOADLITERAL:
+        case LOADLITERAL: {
             // sign extend simm19 
             int32_t simm19_32 = (int32_t)(dec_instr.simm19 << 13) >> 13;
             int64_t offset = (int64_t)simm19_32 << 2;
@@ -219,6 +222,7 @@ void executeLoadStore( ARM_STATE *state) {
             // }
             //set_reg_val(state, dec_instr.rt, val, sf)
             break;
+        }
         default:
             break;
     }
@@ -229,11 +233,12 @@ void executeLoadStore( ARM_STATE *state) {
 
 void executeBranch( ARM_STATE *state) {
     DECODED_INSTR dec_instr = state->decoded;
+    int64_t offset;
     switch (dec_instr.branch_type) {
-        case UNCOND:
+        case UNCOND:;
             // sign extend simm26 
             int32_t simm26_32 = (int32_t)(dec_instr.simm26 << 6) >> 6;
-            int64_t offset = (int64_t)simm26_32 << 2;
+            offset = (int64_t)simm26_32 << 2;
             // add offset to PC
             state->pc += offset;
             break;
@@ -241,10 +246,10 @@ void executeBranch( ARM_STATE *state) {
             // set PC to 64-bit value from specified register
             state->pc = get_reg_val(state,dec_instr.xn,true);
             break;
-        case COND:
+        case COND:;
             // sign extend simm19 
             int32_t simm19_32 = (int32_t)(dec_instr.simm19 << 13) >> 13;
-            int64_t offset = (int64_t)simm19_32 << 2;
+            offset = (int64_t)simm19_32 << 2;
 
             // add offset if cond is met
             if (check_branch_cond(dec_instr.cond,state->pstate)){
@@ -280,7 +285,8 @@ bool check_branch_cond(uint8_t cond, PSTATE_Flags pstate){
             // AL: always true
             return true;
         default:
-            break;
+            fprintf(stderr, "Unknown condition type");
+            return false;
     }
 }
 

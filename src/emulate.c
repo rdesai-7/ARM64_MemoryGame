@@ -46,21 +46,21 @@ void set_reg_val(ARM_STATE *state, uint8_t reg_id, uint64_t value, bool is_64_bi
 
 uint64_t loadMemory(ARM_STATE *state, uint32_t addr, bool is_64_bit) {
   if (is_64_bit) {
-    return (state->memory[addr + 7] << 56) |
-           (state->memory[addr + 6] << 48) |
-           (state->memory[addr + 5] << 40) |
-           (state->memory[addr + 4] << 32) |
-           (state->memory[addr + 3] << 24) | 
-           (state->memory[addr + 2] << 16) |
-           (state->memory[addr + 1] << 8) |
-           (state->memory[addr]);
+    return (uint64_t) ((uint64_t)state->memory[addr + 7] << 56) |
+           ((uint64_t)state->memory[addr + 6] << 48) |
+           ((uint64_t)state->memory[addr + 5] << 40) |
+           ((uint64_t)state->memory[addr + 4] << 32) |
+           ((uint64_t)state->memory[addr + 3] << 24) | 
+           ((uint64_t)state->memory[addr + 2] << 16) |
+           ((uint64_t)state->memory[addr + 1] << 8) |
+           ((uint64_t)state->memory[addr]);
   } else {
-    return (uint32_t) (state->memory[addr + 3] << 24) |
-                    (state->memory[addr + 2] << 16) |
-                    (state->memory[addr + 1] << 8) |
-                    (state->memory[addr]);
+    return (uint32_t) ((uint32_t)state->memory[addr + 3] << 24) |
+                    ((uint32_t)state->memory[addr + 2] << 16) |
+                    ((uint32_t)state->memory[addr + 1] << 8) |
+                    ((uint32_t)state->memory[addr]);
   }
-}
+} //NO TYPECASTING NEEDED??
 
 void storeMemory(ARM_STATE *state, uint32_t addr, bool is_64_bit, uint64_t value) {
   if (is_64_bit) {
