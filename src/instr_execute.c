@@ -151,31 +151,46 @@ void executeLoadStore( ARM_STATE *state) {
     DECODED_INSTR dec_instr = state->decoded;
     switch (dec_instr.loadstore_type) {
         case SDT:
-            // sf, U, L, offset, xn, rt
-
+    
             uint64_t addr;
-            if (dec_instr.U == 1) {
-                // memory addressing: unsigned immediate offset
-                uint64_t uoffset;
-                if (sf) {
-                    uoffset = dec_instr.imm12 << 3;
-                } else {
-                    uoffset = dec_instr.imm12 << 2;
-                }
-                addr = dec_instr.xn + uoffset;
-            } else if (dec_instr.I == 1) {
-                // memory addressing: pre-indexed
-            } else if (dec_instr.I == 0) {
-                // memory addressing: post-indexed
+            switch (dec_instr.addr_mode) {
+                case U_OFFSET:
+                    uint64_t uoffset;
+                    if (sf) {
+                        uoffset = dec_instr.offset << 3;
+                    } else {
+                        uoffset = dec_instr.offset << 2;
+                    }
+                    addr = get_reg_val(state,dec_instr.xn,true) + uoffset;
+                    break;
+                case PRE_INDEXED:
+                    // sign-extend simm9 to 64bit
+                    int64_t simm9 = (int64_t)((dec_instr.simm9 << 7) >> 7); 
+                    addr = get_reg_val(state,dec_instr.xn,true)  + simm9;
+                    set_reg_val(state,dec_instr.xn,addr,true);
+                    break;
+                case POST_INDEXED:
+                    addr = get_reg_val(state,dec_instr.xn,true);
+                    int64_t simm9 = (int64_t)((dec_instr.simm9 << 7) >> 7); 
+                    set_reg_val(state,dec_instr.xn,addr+simm9,true);
+                    break;
+                case REG_OFFSET:
+                    addr = get_reg_val(state,dec_instr.xn,true) + get_reg_val(state,dec_instr.xm,true);
+                    break;
+                default:
+                    break;
             }
 
             if (dec_instr.L == 1) {
-                // load
+                // load into rt
+                uint64_t val = loadMemory(state, addr, sf);
+                set_reg_val(state,dec_instr.rt, val, sf);
             } else {
                 // store
+                uint64_t val = get_reg_val(state,dec_instr.rt,true);
+                storeMemory(state, addr, sf, val);
             }
-
-        
+            break;
         case LOADLITERAL:
             // sign extend simm19 
             int32_t simm19_32 = (int32_t)(dec_instr.simm19 << 13) >> 13;
@@ -183,31 +198,33 @@ void executeLoadStore( ARM_STATE *state) {
             uint64_t start_address = state->pc + offset;
 
             // load the value into rt
-            // TODO: MAKE BELOW CODE A HELPER FUNCTION. ie load_memory, store_memory functions similar to get/set_reg_val
-            if (sf) {
-                // target register is 64bit
-                uint64_t val = (state->memory[start_address + 7] << 64) |
-                    (state->memory[start_address + 6]) << 56|
-                    (state->memory[start_address + 5] << 48) |
-                    (state->memory[start_address + 4] << 40) |
-                    (state->memory[start_address + 3]) << 32 | 
-                    (state->memory[start_address + 2] << 16) |
-                    (state->memory[start_address + 1] << 8) |
-                    (state->memory[start_address]);
-            } else {
-                // target register is 32bit
-                uint32_t val = (state->memory[start_address + 3] << 24) |
-                    (state->memory[start_address + 2] << 16) |
-                    (state->memory[start_address + 1] << 8) |
-                    (state->memory[start_address]);
-            }
-            set_reg_val(state, dec_instr.rt, val, sf)
+            uint64_t val = loadMemory(state,start_address,sf);
+            set_reg_val(state, dec_instr.rt, val, sf);
+
+            // if (sf) {
+            //     // target register is 64bit
+            //     uint64_t val = (state->memory[start_address + 7] << 64) |
+            //         (state->memory[start_address + 6]) << 56|
+            //         (state->memory[start_address + 5] << 48) |
+            //         (state->memory[start_address + 4] << 40) |
+            //         (state->memory[start_address + 3]) << 32 | 
+            //         (state->memory[start_address + 2] << 16) |
+            //         (state->memory[start_address + 1] << 8) |
+            //         (state->memory[start_address]);
+            // } else {
+            //     // target register is 32bit
+            //     uint32_t val = (state->memory[start_address + 3] << 24) |
+            //         (state->memory[start_address + 2] << 16) |
+            //         (state->memory[start_address + 1] << 8) |
+            //         (state->memory[start_address]);
+            // }
+            //set_reg_val(state, dec_instr.rt, val, sf)
+            break;
         default:
             break;
     }
 
 }
-
 
 
 
@@ -224,6 +241,7 @@ void executeBranch( ARM_STATE *state) {
         case REG:
             // set PC to 64-bit value from specified register
             state->pc = get_reg_val(state,dec_instr.xn,true);
+            break;
         case COND:
             // sign extend simm19 
             int32_t simm19_32 = (int32_t)(dec_instr.simm19 << 13) >> 13;
@@ -233,6 +251,7 @@ void executeBranch( ARM_STATE *state) {
             if (check_branch_cond(dec_instr.cond,state->pstate)){
                 state->pc += offset;
             }
+            break;
         default:
             break;
     }

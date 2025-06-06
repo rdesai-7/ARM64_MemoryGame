@@ -43,6 +43,14 @@ typedef enum {
     LOADLITERAL
 } loadstore_types;
 
+// Addressing Modes
+typedef enum {
+    U_OFFSET,
+    PRE_INDEXED,
+    POST_INDEXED,
+    REG_OFFSET
+} addr_modes;
+
 //Decoded Instruction
 typedef struct {
     bool sf;
@@ -85,6 +93,7 @@ typedef struct {
 
     branch_types branch_type;
     loadstore_types loadstore_type;
+    addr_modes addr_mode;
     
 } DECODED_INSTR; 
 

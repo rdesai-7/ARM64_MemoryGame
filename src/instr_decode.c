@@ -54,6 +54,27 @@ void decodeLoadStore ( DECODED_INSTR *decoded, uint32_t instr ) {
     decoded->L      = get_bits(instr, 22, 22);
     decoded->offset = get_bits(instr, 21, 10); //offset can be decomposed in execute based on addressing mode?
     decoded->xn     = get_bits(instr, 9, 5);
+
+    // decide addressing mode
+    if (decoded->U == 1) {
+      decoded->addr_mode = U_OFFSET;
+    } else if (get_bits(instr,21,21) == 1) {
+      decoded->addr_mode = REG_OFFSET;
+      decoded->xm = get_bits(instr,20,16);
+    } else {
+      // pre/post indexed
+      decoded->I = get_bits(instr,11,11);
+      decoded->simm9 = get_bits(instr,20,12); 
+      if (decoded->I == 1) {
+        // pre-indexed
+        decoded->addr_mode = PRE_INDEXED;
+      } else {
+        // post-indexed
+        decoded->addr_mode = POST_INDEXED;
+      }
+
+    }
+
   } else { //Load Literal
     decoded->loadstore_type = LOADLITERAL;
     decoded->simm19 = get_bits(instr, 23, 5);
