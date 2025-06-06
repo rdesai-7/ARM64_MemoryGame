@@ -4,6 +4,7 @@
 #include "emulator_state.h"
 #include "instr_decode.h"
 #include "instr_execute.h"
+#include "bit_shift.h"
 
 typedef enum {
     LSL,
@@ -61,7 +62,7 @@ void executeDPRegister( ARM_STATE *state) {
             }
         }
 
-        uint64_t op2 = 
+        shift_func_
 
 
     }

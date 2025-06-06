@@ -83,3 +83,5 @@ uint64_t ror(uint64_t operand, uint8_t sh_amt, bool is_64_bit) {
         return (uint64_t)(right_part | wrapped_part); 
     }
 }
+
+typedef uint64_t (*shift_func_t) (uint64_t, uint8_t, bool);
