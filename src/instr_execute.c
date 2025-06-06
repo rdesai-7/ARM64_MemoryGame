@@ -57,11 +57,16 @@ void update_pstate_arith( ARM_STATE *state, uint64_t operand1, uint64_t operand2
 }
 
 //EXECUTE FUNCTIONS
+void execute(ARM_STATE *state) {
+    func_execute executeFunctions[] = {executeDPImmediate, executeDPRegister, executeLoadStore, executeBranch};
+    executeFunctions[state->instruction_type](state);
+}
+
 void executeDPImmediate( ARM_STATE *state) {
     DECODED_INSTR dec_instr = state->decoded;
     bool is_64_bit = dec_instr.sf;
 
-    // Check if it is arithmetic or wide move
+    
     if (dec_instr.opi == 0x2) {
         if (dec_instr.sh == 1) {
         dec_instr.imm12 <<= 12;
@@ -70,23 +75,23 @@ void executeDPImmediate( ARM_STATE *state) {
         uint64_t result = 0;
         bool update_flags = false;
         bool is_sub = false;
-        uint64_t rn = dec_instr.rn;
+        uint64_t rn_val = get_reg_val(state, dec_instr.rn, is_64_bit);
         uint64_t imm12 = dec_instr.imm12;
 
         switch (dec_instr.opc) {
         case 0x0:
-        result = rn + imm12;
+        result = rn_val + imm12;
         break;
         case 0x1:
-        result = rn + imm12;
+        result = rn_val + imm12;
         update_flags = true;
         break;
         case 0x2:
-        result = rn - imm12;
+        result = rn_val - imm12;
         is_sub = true;
         break;
         case 0x3:
-        result = rn - imm12;
+        result = rn_val - imm12;
         is_sub = true;
         update_flags = true;
         break;
@@ -99,7 +104,7 @@ void executeDPImmediate( ARM_STATE *state) {
 
         // Updating pstate if needed
         if (update_flags) {
-            update_pstate_arith( state,  rn, imm12, result, is_sub, is_64_bit );
+            update_pstate_arith( state,  rn_val, imm12, result, is_sub, is_64_bit );
         }
 
     } else if (dec_instr.opi == 0x5) {

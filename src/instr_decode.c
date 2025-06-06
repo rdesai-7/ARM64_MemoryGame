@@ -23,7 +23,7 @@ void decodeDPImmediate ( DECODED_INSTR *decoded, uint32_t instr ) {
 
 void decodeDPRegister ( DECODED_INSTR *decoded, uint32_t instr ) {
   decoded->sf  = get_bits(instr, 31, 31);
-  decoded->opc = get_bits(instr, 30, 29);
+  decoded->opc = get_bits(instr, 30, 29); 
   decoded->M   = get_bits(instr, 28, 28);
   decoded->opr = get_bits(instr, 24, 21);
   decoded->rm  = get_bits(instr, 20, 16);
@@ -36,6 +36,7 @@ void decodeDPRegister ( DECODED_INSTR *decoded, uint32_t instr ) {
     decoded->ra = get_bits(instr, 14, 10);
   } else { //arith/logic
     decoded->shift = get_bits(instr, 23, 22);
+    decoded->operand = get_bits(instr, 15, 10);
     if ((decoded->opr >> 3) == 0) { //store N if logical
       decoded->N = get_bits(instr, 21, 21);
     }
@@ -49,34 +50,11 @@ void decodeLoadStore ( DECODED_INSTR *decoded, uint32_t instr ) {
   decoded->rt = get_bits(instr, 4, 0);
   //check if sdt or load literal
   if (get_bits(instr, 31, 31)) { //SDT
-    decoded->loadstore_type = SDT;
     decoded->U      = get_bits(instr, 24, 24);
     decoded->L      = get_bits(instr, 22, 22);
     decoded->offset = get_bits(instr, 21, 10); //offset can be decomposed in execute based on addressing mode?
     decoded->xn     = get_bits(instr, 9, 5);
-
-    // decide addressing mode
-    if (decoded->U == 1) {
-      decoded->addr_mode = U_OFFSET;
-    } else if (get_bits(instr,21,21) == 1) {
-      decoded->addr_mode = REG_OFFSET;
-      decoded->xm = get_bits(instr,20,16);
-    } else {
-      // pre/post indexed
-      decoded->I = get_bits(instr,11,11);
-      decoded->simm9 = get_bits(instr,20,12); 
-      if (decoded->I == 1) {
-        // pre-indexed
-        decoded->addr_mode = PRE_INDEXED;
-      } else {
-        // post-indexed
-        decoded->addr_mode = POST_INDEXED;
-      }
-
-    }
-
   } else { //Load Literal
-    decoded->loadstore_type = LOADLITERAL;
     decoded->simm19 = get_bits(instr, 23, 5);
   }
 }
