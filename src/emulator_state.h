@@ -115,5 +115,7 @@ uint32_t get_bits( uint32_t source, int start_bit, int end_bit );
 uint64_t get_reg_val(ARM_STATE *state, uint8_t reg_id, bool is_64_bit);
 void set_reg_val(ARM_STATE *state, uint8_t reg_id, uint64_t value, bool is_64_bit);
 instr_type getInstructionType (uint32_t instr);
+void storeMemory(ARM_STATE *state, uint32_t addr, bool is_64_bit, uint64_t value);
+uint64_t loadMemory(ARM_STATE *state, uint32_t addr, bool is_64_bit) ;
 
 #endif
