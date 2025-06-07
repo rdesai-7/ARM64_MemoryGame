@@ -1,3 +1,6 @@
+#ifndef INSTR_DECODE_H
+#define INSTR_DECODE_H
+
 #include <stdint.h>
 
 //Decode function pointers
@@ -9,3 +12,5 @@ extern void decodeDPImmediate ( DECODED_INSTR *decoded, uint32_t instr );
 extern void decodeDPRegister ( DECODED_INSTR *decoded, uint32_t instr );
 extern void decodeLoadStore ( DECODED_INSTR *decoded, uint32_t instr );
 extern void decodeBranch ( DECODED_INSTR *decoded, uint32_t instr );
+
+#endif
