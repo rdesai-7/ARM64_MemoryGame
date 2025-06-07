@@ -104,14 +104,14 @@ void decodeBranch ( DECODED_INSTR *decoded, uint32_t instr ) {
 
 void decode (ARM_STATE *state) {
   uint32_t instruction = state->instruction;
-  DECODED_INSTR decoded = state->decoded;
+  //DECODED_INSTR decoded = state->decoded;
   if (state->halt_flag) {
     return;
   } else {
     instr_type type = getInstructionType(instruction);
     // POTENTIALLY PASS POINTERS TO FUNCTION FOR EFFICIENCY 
     func_decode decodeFunctions[] = {decodeDPImmediate, decodeDPRegister, decodeLoadStore, decodeBranch};
-    decodeFunctions[type](&decoded, instruction);
+    decodeFunctions[type](&state->decoded, instruction);
     state->instruction_type = type;
   }
 }
