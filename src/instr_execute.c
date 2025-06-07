@@ -233,18 +233,26 @@ void executeLoadStore( ARM_STATE *state) {
 
 }
 
-
-
 void executeBranch( ARM_STATE *state) {
+    //fprintf(state->output, "executeBranch has just been called\n");//REMOVE TS
     DECODED_INSTR dec_instr = state->decoded;
+    //fprintf(state->output, "branch type is %d \n",dec_instr.branch_type);//REMOVE TS
     int64_t offset;
     switch (dec_instr.branch_type) {
         case UNCOND:;
             // sign extend simm26 
+            //fprintf(state->output, "uncond branch");//REMOVE TS
+            //fprintf(state->output, "the fackin instruction is %d \n",state->instruction);//REMOVE TS
+            //fprintf(state->output, "the simm26 is %d \n",dec_instr.simm26);//REMOVE TS
+            //fprintf(state->output, "the simm26 should be %d \n", get_bits(state->instruction, 25, 0));
             int32_t simm26_32 = (int32_t)(dec_instr.simm26 << 6) >> 6;
+            // fprintf(state->output, "the simm26_32 is %d \n",simm26_32);//REMOVE TS
             offset = (int64_t)simm26_32 << 2;
+            //fprintf(state->output, "the offset is %ld \n",offset);//REMOVE TS
+            //fprintf(state->output, "old pc is %ld \n",state->pc);//REMOVE TS
             // add offset to PC
             state->pc += offset;
+            //fprintf(state->output, "new pc is %ld \n",state->pc);//REMOVE TS
             break;
         case REG:
             // set PC to 64-bit value from specified register
