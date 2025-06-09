@@ -206,20 +206,17 @@ int main(int argc, char *argv[]) {
   //read file into memory
   readBinary(&state, binary_filename);
 
-  int i = 0;
   //fetch, decode, execute cycle
   while (!state.halt_flag) {
     //fprintf(state.output,"RUNNING FDE CYCLE NUMBER %x \n",i);//REMOVE TS
     fetch(&state);
-    incrementPC(&state);
+    
     decode(&state);
     //fprintf(state.output,"decoded simm26 value is %d \n", state.decoded.simm26);
     execute(&state);
-    i++;
-    if (i == 100) {
-      break;
+    if (state.instruction_type != BRANCH) {
+      incrementPC(&state);
     }
-
     //fprintf(state.output,"the pc value is: %lx \n",state.pc); //REMOVE TS
   }
 
