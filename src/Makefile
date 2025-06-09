@@ -8,7 +8,7 @@ TARGETS = assemble emulate
 
 # Object files for each target
 ASSEMBLE_OBJS = assemble.o
-EMULATE_OBJS = emulate.o instr_decode.o instr_execute.o dpRegister_execute.o bit_shifts.o
+EMULATE_OBJS = emulate.o instr_decode.o instr_execute.o bit_shifts.o
 
 .SUFFIXES: .c .o
 
