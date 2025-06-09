@@ -1,3 +1,6 @@
+#ifndef INSTR_EXECUTE_H
+#define INSTR_EXECUTE_H
+
 #include <stdint.h>
 #include "emulator_state.h" //NEED TO ADD GUARDS LATER
 
@@ -19,3 +22,5 @@ extern void executeLoadStore( ARM_STATE *state);
 extern void executeBranch( ARM_STATE *state);
 
 extern bool check_branch_cond(uint8_t cond, PSTATE_Flags pstate);
+
+#endif
