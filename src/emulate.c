@@ -38,7 +38,7 @@ void set_reg_val(ARM_STATE *state, uint8_t reg_id, uint64_t value, bool is_64_bi
         return; 
     }
 
-    fprintf(state->output, "I AM SETTING SOMETHING TO A REGISTER NOW!"); // REMOVE TS
+    fprintf(state->output, "I AM SETTING SOMETHING TO A REGISTER NOW! \n"); // REMOVE TS
     if (is_64_bit) {
         state->registers[reg_id] = value;
     } else {
@@ -123,7 +123,7 @@ void incrementPC (ARM_STATE *state) {
 instr_type getInstructionType (uint32_t instr) {
   if (get_bits(instr, 28, 26) == 0x4) {
     return DP_IMMEDIATE;
-  } else if (get_bits(instr, 27, 5) == 0x5) {
+  } else if (get_bits(instr, 27, 25) == 0x5) {
     return DP_REGISTER;
   } else if (get_bits(instr, 28, 26) == 0x5) {
     return BRANCH;
@@ -170,9 +170,10 @@ void printBinary ( ARM_STATE *state ) {
                            (state->memory[i + 2] << 16) |
                            (state->memory[i + 1] << 8)  |
                            (state->memory[i]);
-    if (nextMemWord != 0) {
-      fprintf(state->output, "0x%08x: %08x\n", i, nextMemWord);
-    }
+    //if (nextMemWord != 0) {
+    //  fprintf(state->output, "0x%08x: %08x\n", i, nextMemWord);
+    //}
+    fprintf(state->output, "0x%08x: %08x\n", i, nextMemWord);
   }
 }
 

@@ -57,21 +57,15 @@ void update_pstate_arith( ARM_STATE *state, uint64_t operand1, uint64_t operand2
     }
 }
 
-//EXECUTE FUNCTIONS
-// void execute(ARM_STATE *state) {
-//     func_execute executeFunctions[] = {executeDPImmediate, executeDPRegister, executeLoadStore, executeBranch};
-//     executeFunctions[state->instruction_type](state);
-// }
-
 void executeDPImmediate( ARM_STATE *state) {
     DECODED_INSTR dec_instr = state->decoded;
     bool is_64_bit = dec_instr.sf;
 
-    
     if (dec_instr.opi == 0x2) {
         if (dec_instr.sh == 1) {
-        dec_instr.imm12 <<= 12;
+                dec_instr.imm12 <<= 12;
         }
+
 
         uint64_t result = 0;
         bool update_flags = false;
@@ -80,24 +74,24 @@ void executeDPImmediate( ARM_STATE *state) {
         uint64_t imm12 = dec_instr.imm12;
 
         switch (dec_instr.opc) {
-        case 0x0:
-        result = rn_val + imm12;
-        break;
-        case 0x1:
-        result = rn_val + imm12;
-        update_flags = true;
-        break;
-        case 0x2:
-        result = rn_val - imm12;
-        is_sub = true;
-        break;
-        case 0x3:
-        result = rn_val - imm12;
-        is_sub = true;
-        update_flags = true;
-        break;
-        default:
-        break;
+            case 0x0:
+                result = rn_val + imm12;
+                break;
+            case 0x1:
+                result = rn_val + imm12;
+                update_flags = true;
+                break;
+            case 0x2:
+                result = rn_val - imm12;
+                is_sub = true;
+                break;
+            case 0x3:
+                result = rn_val - imm12;
+                is_sub = true;
+                update_flags = true;
+                break;
+            default:
+                break;
         }
         //IMPLEMENT SET REGISTER VALUE FUNCTION
 
@@ -156,10 +150,14 @@ void executeLoadStore( ARM_STATE *state) {
     bool sf = dec_instr.sf;
     uint64_t addr;
     int64_t simm9;
+    fprintf(state->output, "LOAD STORE INSTRUCTION");//REMOVE TS
+    fprintf(state->output, "instr type is %d \n", dec_instr.loadstore_type);//REMOVE TS
+    fprintf(state->output, "address mode is %d \n", dec_instr.addr_mode);//REMOVE TS
+
     switch (dec_instr.loadstore_type) {
         case SDT:
             switch (dec_instr.addr_mode) {
-                case U_OFFSET: {
+                case U_OFFSET:
                     uint64_t uoffset;
                     if (sf) {
                         uoffset = dec_instr.offset << 3;
@@ -168,7 +166,6 @@ void executeLoadStore( ARM_STATE *state) {
                     }
                     addr = get_reg_val(state,dec_instr.xn,true) + uoffset;
                     break;
-                }
                 case PRE_INDEXED:
                     // sign-extend simm9 to 64bit
                     simm9 = (int64_t)((dec_instr.simm9 << 7) >> 7); 
@@ -347,16 +344,32 @@ void executeDPRegister( ARM_STATE *state) {
     bool is_64_bit = dec_instr.sf;
     uint64_t rn_val = get_reg_val(state, dec_instr.rn, is_64_bit);
     uint64_t rm_val = get_reg_val(state, dec_instr.rm, is_64_bit);
-
+    /*
+    fprintf(state->output, "DP REGISTER FUNCTION");//REMOVE TS
+    fprintf(state->output, "rm is %d \n", dec_instr.rm);//REMOVE TS
+    fprintf(state->output, "rd is %d \n", dec_instr.rd);//REMOVE TS
+    fprintf(state->output, "rn is %d \n", dec_instr.rn);//REMOVE TS
+    fprintf(state->output, "opc is %d \n", dec_instr.opc);//REMOVE TS
+    fprintf(state->output, "N is %d \n", dec_instr.N);//REMOVE TS
+    fprintf(state->output, "M is %d \n", dec_instr.M);//REMOVE TS
+    bool is_arith_check = dec_instr.opr >> 3;
+    fprintf(state->output, "is_arith is %d \n", is_arith_check);//REMOVE TS
+*/
     // ARITHMETIC AND LOGICAL OPS
     if ( dec_instr.M == 0 ) {
+        /*
+        fprintf(state->output, "arith/logic operation \n");//REMOVE TS
+        fprintf(state->output, "operand is %d \n", dec_instr.operand);//REMOVE TS
+        fprintf(state->output, "shift is %d \n", dec_instr.shift);//REMOVE TS
+        */
 
         //Check if its 32 bit the operation is the correct size
-        if (!is_64_bit && dec_instr.operand) {
-            fprintf(stderr, "Shift Amount greater than 32 bits");
-            state->halt_flag = true;
-            return;
-        }
+        //THIS IS WRONG
+        //if (!is_64_bit && dec_instr.operand) {
+            //fprintf(stderr, "Shift Amount greater than 32 bits");
+            //state->halt_flag = true;
+            //return;
+        //}
 
         Shift_type_t shift_type = getShiftType(dec_instr.shift);
 
@@ -392,6 +405,7 @@ void executeDPRegister( ARM_STATE *state) {
         }
 
         op2 = (*shift_func) (rm_val, dec_instr.operand, is_64_bit);
+        fprintf(state->output, "op2 is %ld", op2);//REMOVE TS
 
         //Check if it needs to be negated
         if (!is_arith && dec_instr.N == 1) {
@@ -441,6 +455,12 @@ void executeDPRegister( ARM_STATE *state) {
                 break;
             case 0x1:
                 result = rn_val | op2;
+                fprintf(state->output, "ORR FUNCTION");//REMOVE TS
+                fprintf(state->output, "rd is %d \n", dec_instr.rd);//REMOVE TS
+                fprintf(state->output, "rn is %d \n", dec_instr.rn);//REMOVE TS
+                fprintf(state->output, "rn value is %ld \n", rn_val);//REMOVE TS
+                fprintf(state->output, "op2 is %ld \n", op2);//REMOVE TS
+                fprintf(state->output, "result is %ld \n", result);//REMOVE TS
                 break;
             case 0x2:
                 result = rn_val ^ op2;
@@ -459,8 +479,6 @@ void executeDPRegister( ARM_STATE *state) {
                 update_pstate_logical( state, result, is_64_bit );
             }
         }
-
-
     } else if ( dec_instr.M == 1 && dec_instr.opc == 0x0 && dec_instr.opr == 0x8) {
         uint64_t ra_val = get_reg_val(state, dec_instr.ra, is_64_bit);
         uint64_t product = rn_val * rm_val;
@@ -484,5 +502,6 @@ void execute(ARM_STATE *state) {
         return;
     }
     func_execute executeFunctions[] = {executeDPImmediate, executeDPRegister, executeLoadStore, executeBranch};
+    fprintf(state->output, "instruction type is %d \n", state->instruction_type);//REMOVE TS
     executeFunctions[state->instruction_type](state);
 }

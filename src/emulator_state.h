@@ -59,7 +59,7 @@ typedef struct {
     uint8_t rd;
 
     bool sh;
-    uint16_t imm12;
+    uint32_t imm12;
     uint8_t rn;
 
     uint8_t hw;
