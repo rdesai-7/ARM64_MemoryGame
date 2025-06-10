@@ -66,7 +66,6 @@ void executeDPImmediate( ARM_STATE *state) {
                 dec_instr.imm12 <<= 12;
         }
 
-
         uint64_t result = 0;
         bool update_flags = false;
         bool is_sub = false;
@@ -93,8 +92,6 @@ void executeDPImmediate( ARM_STATE *state) {
             default:
                 break;
         }
-        //IMPLEMENT SET REGISTER VALUE FUNCTION
-
         set_reg_val(state, dec_instr.rd, result, is_64_bit);
 
         // Updating pstate if needed
@@ -149,7 +146,7 @@ void executeLoadStore( ARM_STATE *state) {
     DECODED_INSTR dec_instr = state->decoded;
     bool sf = dec_instr.sf;
     uint64_t addr;
-    int64_t simm9;
+    int64_t new_simm9;
     fprintf(state->output, "LOAD STORE INSTRUCTION");//REMOVE TS
     fprintf(state->output, "instr type is %d \n", dec_instr.loadstore_type);//REMOVE TS
     fprintf(state->output, "address mode is %d \n", dec_instr.addr_mode);//REMOVE TS
@@ -157,7 +154,7 @@ void executeLoadStore( ARM_STATE *state) {
     switch (dec_instr.loadstore_type) {
         case SDT:
             switch (dec_instr.addr_mode) {
-                case U_OFFSET:
+                case U_OFFSET: {
                     uint64_t uoffset;
                     if (sf) {
                         uoffset = dec_instr.offset << 3;
@@ -166,19 +163,24 @@ void executeLoadStore( ARM_STATE *state) {
                     }
                     addr = get_reg_val(state,dec_instr.xn,true) + uoffset;
                     break;
+                }
                 case PRE_INDEXED:
                     // sign-extend simm9 to 64bit
-                    simm9 = (int64_t)((dec_instr.simm9 << 7) >> 7); 
-                    addr = get_reg_val(state,dec_instr.xn,true)  + simm9;
-                    set_reg_val(state,dec_instr.xn,addr,true);
+                    new_simm9 = (int64_t)(dec_instr.simm9);
+                    addr = (int64_t)get_reg_val(state, dec_instr.xn, true) + new_simm9;
+                    set_reg_val(state, dec_instr.xn, addr, true);
                     break;
                 case POST_INDEXED:
-                    addr = get_reg_val(state,dec_instr.xn,true);
-                    simm9 = (int64_t)((dec_instr.simm9 << 7) >> 7); 
-                    set_reg_val(state,dec_instr.xn,addr+simm9,true);
+                    fprintf(state->output, "POST INDEXED");//REMOVE TS
+                    addr = (int64_t)get_reg_val(state, dec_instr.xn, true);
+                    new_simm9 = (int64_t)(dec_instr.simm9);
+                    fprintf(state->output, "orig simm9 is %d \n", dec_instr.simm9);//REMOVE TS
+                    fprintf(state->output, "addr is %ld \n", addr);//REMOVE TS
+                    fprintf(state->output, "simm9 is %ld \n", new_simm9);//REMOVE TS
+                    set_reg_val(state, dec_instr.xn, addr + new_simm9 ,true);
                     break;
                 case REG_OFFSET:
-                    addr = get_reg_val(state,dec_instr.xn,true) + get_reg_val(state,dec_instr.xm,true);
+                    addr = get_reg_val(state, dec_instr.xn, true) + get_reg_val(state, dec_instr.xm, true);
                     break;
                 default:
                     break;
@@ -196,60 +198,30 @@ void executeLoadStore( ARM_STATE *state) {
             break;
         case LOADLITERAL: {
             // sign extend simm19 
-            int32_t simm19_32 = (int32_t)(dec_instr.simm19 << 13) >> 13;
+            int32_t simm19_32 = (int32_t)(dec_instr.simm19);
             int64_t offset = (int64_t)simm19_32 << 2;
             uint64_t start_address = state->pc + offset;
 
             // load the value into rt
             uint64_t val = loadMemory(state,start_address,sf);
             set_reg_val(state, dec_instr.rt, val, sf);
-
-            // if (sf) {
-            //     // target register is 64bit
-            //     uint64_t val = (state->memory[start_address + 7] << 64) |
-            //         (state->memory[start_address + 6]) << 56|
-            //         (state->memory[start_address + 5] << 48) |
-            //         (state->memory[start_address + 4] << 40) |
-            //         (state->memory[start_address + 3]) << 32 | 
-            //         (state->memory[start_address + 2] << 16) |
-            //         (state->memory[start_address + 1] << 8) |
-            //         (state->memory[start_address]);
-            // } else {
-            //     // target register is 32bit
-            //     uint32_t val = (state->memory[start_address + 3] << 24) |
-            //         (state->memory[start_address + 2] << 16) |
-            //         (state->memory[start_address + 1] << 8) |
-            //         (state->memory[start_address]);
-            // }
-            //set_reg_val(state, dec_instr.rt, val, sf)
             break;
         }
         default:
             break;
     }
-
 }
 
 void executeBranch( ARM_STATE *state) {
-    //fprintf(state->output, "executeBranch has just been called\n");//REMOVE TS
     DECODED_INSTR dec_instr = state->decoded;
-    //fprintf(state->output, "branch type is %d \n",dec_instr.branch_type);//REMOVE TS
     int64_t offset;
     switch (dec_instr.branch_type) {
         case UNCOND:;
             // sign extend simm26 
-            //fprintf(state->output, "uncond branch");//REMOVE TS
-            //fprintf(state->output, "the fackin instruction is %d \n",state->instruction);//REMOVE TS
-            //fprintf(state->output, "the simm26 is %d \n",dec_instr.simm26);//REMOVE TS
-            //fprintf(state->output, "the simm26 should be %d \n", get_bits(state->instruction, 25, 0));
-            int32_t simm26_32 = (int32_t)(dec_instr.simm26 << 6) >> 6;
-            // fprintf(state->output, "the simm26_32 is %d \n",simm26_32);//REMOVE TS
+            int32_t simm26_32 = (int32_t)(dec_instr.simm26);
             offset = (int64_t)simm26_32 << 2;
-            //fprintf(state->output, "the offset is %ld \n",offset);//REMOVE TS
-            //fprintf(state->output, "old pc is %ld \n",state->pc);//REMOVE TS
             // add offset to PC
             state->pc += offset;
-            //fprintf(state->output, "new pc is %ld \n",state->pc);//REMOVE TS
             break;
         case REG:
             // set PC to 64-bit value from specified register
@@ -257,7 +229,7 @@ void executeBranch( ARM_STATE *state) {
             break;
         case COND:;
             // sign extend simm19 
-            int32_t simm19_32 = (int32_t)(dec_instr.simm19 << 13) >> 13;
+            int32_t simm19_32 = (int32_t)(dec_instr.simm19);
             offset = (int64_t)simm19_32 << 2;
 
             // add offset if cond is met
@@ -344,25 +316,8 @@ void executeDPRegister( ARM_STATE *state) {
     bool is_64_bit = dec_instr.sf;
     uint64_t rn_val = get_reg_val(state, dec_instr.rn, is_64_bit);
     uint64_t rm_val = get_reg_val(state, dec_instr.rm, is_64_bit);
-    /*
-    fprintf(state->output, "DP REGISTER FUNCTION");//REMOVE TS
-    fprintf(state->output, "rm is %d \n", dec_instr.rm);//REMOVE TS
-    fprintf(state->output, "rd is %d \n", dec_instr.rd);//REMOVE TS
-    fprintf(state->output, "rn is %d \n", dec_instr.rn);//REMOVE TS
-    fprintf(state->output, "opc is %d \n", dec_instr.opc);//REMOVE TS
-    fprintf(state->output, "N is %d \n", dec_instr.N);//REMOVE TS
-    fprintf(state->output, "M is %d \n", dec_instr.M);//REMOVE TS
-    bool is_arith_check = dec_instr.opr >> 3;
-    fprintf(state->output, "is_arith is %d \n", is_arith_check);//REMOVE TS
-*/
     // ARITHMETIC AND LOGICAL OPS
     if ( dec_instr.M == 0 ) {
-        /*
-        fprintf(state->output, "arith/logic operation \n");//REMOVE TS
-        fprintf(state->output, "operand is %d \n", dec_instr.operand);//REMOVE TS
-        fprintf(state->output, "shift is %d \n", dec_instr.shift);//REMOVE TS
-        */
-
         //Check if its 32 bit the operation is the correct size
         //THIS IS WRONG
         //if (!is_64_bit && dec_instr.operand) {
@@ -405,7 +360,6 @@ void executeDPRegister( ARM_STATE *state) {
         }
 
         op2 = (*shift_func) (rm_val, dec_instr.operand, is_64_bit);
-        fprintf(state->output, "op2 is %ld", op2);//REMOVE TS
 
         //Check if it needs to be negated
         if (!is_arith && dec_instr.N == 1) {
@@ -455,12 +409,6 @@ void executeDPRegister( ARM_STATE *state) {
                 break;
             case 0x1:
                 result = rn_val | op2;
-                fprintf(state->output, "ORR FUNCTION");//REMOVE TS
-                fprintf(state->output, "rd is %d \n", dec_instr.rd);//REMOVE TS
-                fprintf(state->output, "rn is %d \n", dec_instr.rn);//REMOVE TS
-                fprintf(state->output, "rn value is %ld \n", rn_val);//REMOVE TS
-                fprintf(state->output, "op2 is %ld \n", op2);//REMOVE TS
-                fprintf(state->output, "result is %ld \n", result);//REMOVE TS
                 break;
             case 0x2:
                 result = rn_val ^ op2;

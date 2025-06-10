@@ -170,10 +170,7 @@ void printBinary ( ARM_STATE *state ) {
                            (state->memory[i + 2] << 16) |
                            (state->memory[i + 1] << 8)  |
                            (state->memory[i]);
-    //if (nextMemWord != 0) {
-    //  fprintf(state->output, "0x%08x: %08x\n", i, nextMemWord);
-    //}
-    fprintf(state->output, "0x%08x: %08x\n", i, nextMemWord);
+    fprintf(state->output, "0x%08x : %08x\n", i, nextMemWord);
   }
 }
 
@@ -209,16 +206,12 @@ int main(int argc, char *argv[]) {
 
   //fetch, decode, execute cycle
   while (!state.halt_flag) {
-    //fprintf(state.output,"RUNNING FDE CYCLE NUMBER %x \n",i);//REMOVE TS
     fetch(&state);
-    
     decode(&state);
-    //fprintf(state.output,"decoded simm26 value is %d \n", state.decoded.simm26);
     execute(&state);
     if (state.instruction_type != BRANCH) {
       incrementPC(&state);
     }
-    //fprintf(state.output,"the pc value is: %lx \n",state.pc); //REMOVE TS
   }
 
   //print final state (into stdout or output file)

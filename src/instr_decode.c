@@ -59,13 +59,13 @@ void decodeLoadStore ( DECODED_INSTR *decoded, uint32_t instr ) {
      // decide addressing mode
      if (decoded->U == 1) {
       decoded->addr_mode = U_OFFSET;
-    } else if (get_bits(instr,21,21) == 1) {
+    } else if (get_bits(instr, 21, 21) == 1) {
       decoded->addr_mode = REG_OFFSET;
-      decoded->xm = get_bits(instr,20,16);
+      decoded->xm = get_bits(instr, 20, 16);
     } else {
       // pre/post indexed
-      decoded->I = get_bits(instr,11,11);
-      decoded->simm9 = get_bits(instr,20,12); 
+      decoded->I = get_bits(instr, 11, 11);
+      decoded->simm9 = ((int16_t)(get_bits(instr, 20, 12) << 7) >> 7);
       if (decoded->I == 1) {
         // pre-indexed
         decoded->addr_mode = PRE_INDEXED;
@@ -77,7 +77,7 @@ void decodeLoadStore ( DECODED_INSTR *decoded, uint32_t instr ) {
 
   } else { //Load Literal
     decoded->loadstore_type = LOADLITERAL;
-    decoded->simm19 = get_bits(instr, 23, 5);
+    decoded->simm19 = ((int32_t)(get_bits(instr, 23, 5) << 13) >> 13);
   }
 }
 
@@ -85,7 +85,7 @@ void decodeBranch ( DECODED_INSTR *decoded, uint32_t instr ) {
   //decoded->branch_type = get_bits(instr, 31, 29);
   switch (get_bits(instr, 31, 29)) {
     case 0x0: //unconditional
-      decoded->simm26 = get_bits(instr, 25, 0);
+      decoded->simm26 =((int32_t)(get_bits(instr, 25, 0) << 6) >> 6);
       decoded->branch_type = UNCOND;
       break;
     case 0x6: //register
@@ -93,7 +93,7 @@ void decodeBranch ( DECODED_INSTR *decoded, uint32_t instr ) {
       decoded->branch_type = REG;
       break;
     case 0x2: //conditional
-      decoded->simm19 = get_bits(instr, 23, 5);
+      decoded->simm19 = ((int32_t)(get_bits(instr, 23, 5) << 13) >> 13);
       decoded->cond = get_bits(instr, 3, 0);
       decoded->branch_type = COND;
       break;

@@ -79,16 +79,16 @@ typedef struct {
     bool L;
     bool U;
     uint16_t offset;
-    uint32_t simm19;
+    int32_t simm19;
     uint8_t xn;
     uint8_t rt;
 
     //for addressing modes 
     uint8_t xm;
-    uint16_t simm9;
+    int16_t simm9;
     bool I;
 
-    uint32_t simm26;
+    int32_t simm26;
     uint8_t cond;
 
     branch_types branch_type;
