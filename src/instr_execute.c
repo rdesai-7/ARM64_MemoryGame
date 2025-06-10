@@ -157,7 +157,7 @@ void executeLoadStore( ARM_STATE *state) {
     switch (dec_instr.loadstore_type) {
         case SDT:
             switch (dec_instr.addr_mode) {
-                case U_OFFSET:
+                case U_OFFSET:;
                     uint64_t uoffset;
                     if (sf) {
                         uoffset = dec_instr.offset << 3;
