@@ -165,12 +165,14 @@ void printBinary ( ARM_STATE *state ) {
     state->pstate.C ? 'C' : '-',
     state->pstate.V ? 'V' : '-');
   fprintf(state->output, "Non-zero memory:\n");
-  for (int i = 0; i <= state->pc ; i += 4) {
+  for (int i = 0; i < MEM_SIZE ; i += 4) {
     uint32_t nextMemWord = (state->memory[i + 3] << 24) |
                            (state->memory[i + 2] << 16) |
                            (state->memory[i + 1] << 8)  |
                            (state->memory[i]);
-    fprintf(state->output, "0x%08x : %08x\n", i, nextMemWord);
+    if (nextMemWord != 0) {
+      fprintf(state->output, "0x%08x : %08x\n", i, nextMemWord);
+    }
   }
 }
 
@@ -209,7 +211,7 @@ int main(int argc, char *argv[]) {
     fetch(&state);
     decode(&state);
     execute(&state);
-    if (state.instruction_type != BRANCH) {
+    if (state.instruction_type != BRANCH || ( !check_branch_cond(state.decoded.cond, state.pstate) && state.decoded.branch_type == COND) ) {
       incrementPC(&state);
     }
   }
