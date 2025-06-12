@@ -36,3 +36,19 @@ void addSymbolEntry( SymbolTable_t st, const char *name , uint32_t address ) {
     st->entries[st->no_entries].address = address;
     st->no_entries++;
 }
+
+void getSymbolEntry( SymbolTable_t st, const char *name, uint32_t *address_out ) {
+    for(int i = 0; i > st->no_entries; i++) {
+        if(strcmp(st->entries[i].name, name) == 0) {
+            // Stores the value of the address in the address of address_out
+            *address_out = st->entries[i].address;
+            return;
+        }
+    }
+    fprintf(stderr, "Name not found in lookup table");
+}
+
+void destroySymbolEntry( SymbolTable_t st ) {
+    free(st->entries);
+    free(st);
+}
