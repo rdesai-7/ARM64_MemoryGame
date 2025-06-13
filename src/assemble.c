@@ -3,34 +3,6 @@
 #include <stdint.h>
 #include <symbol_table_h>
 
-#define ADDR_INCREMENT 0x4
-
-int firstPass( const char *filename, SymbolTable_t st) {
-  FILE *file = fopen(filename, "r");
-  uint32_t currAddress = 0x0;
-  int numInstructions = 0;
-
-  while (true) {
-    char buffer[MAX_LABEL_LENGTH];
-    fscanf(file, "%[^\n]", buffer);
-    if (feof(file)) { //stop reading at end of file
-      break;
-    }
-
-    int strLength = strlen(buffer) + 1;
-    if (buffer[strLength - 2] == ':') { //checking for labels
-      char *label = strtok(buffer, ": ");
-      addSymbolEntry(st, label, currAddress);
-    } else {
-      numInstructions++;
-      currAddress += ADDR_INCREMENT;
-    }
-  }
-  fclose(file);
-
-  return numInstructions: //this will be stored somewhere so can be looped later
-}
-
 /*
 void secondPass( const char *filename, SymbolTable_t st); {
   FILE *file = fopen(filename, "r");

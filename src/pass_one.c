@@ -8,8 +8,6 @@
 #include "symbol_table.h"
 #include "pass_one.h"
 
-#define LINE_BUFFER 256
-
 
 char* trim_whitespace(char *s) {
 
@@ -50,6 +48,7 @@ bool is_label(const char *line, char *label_name_out) {
 }
 
 bool run_pass_one( const char *filename, SymbolTable_t st, uint32_t *program_size ) {
+    assert(program_size != NULL);
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
       fprintf(stderr, "Error Opening File");
@@ -61,39 +60,32 @@ bool run_pass_one( const char *filename, SymbolTable_t st, uint32_t *program_siz
 
     while( fgets(line_buffer, sizeof(line_buffer), file) != NULL ) {
         char *line = trim_whitespace(line_buffer);
+        // ISSUE: line may still end in a NEWLINE CHAR? 
 
-        if( is_line_empty(line) ) {
-            continue;
-        }
-
-        char label_name[MAX_LABEL_LENGTH];
-        
-        // Check if the line is a label and stores it in label_name
-        if( is_label( line, label_name ) ) {
-            // Add label and address to symbol table should make function return a bool for error checking
-            addSymbolEntry( st, label_name, curr_address );
+        if( !is_line_empty(line) ) {
+            char label_name[MAX_LABEL_LENGTH];
             
-        } else {
-            // If its not a label or empty line then it will be an instruction or a directive and these are all 4 bytes so increment by 4
-            curr_address += 4;
+            // Check if the line is a label and stores it in label_name
+            if( is_label( line, label_name ) ) {
+                // Add label and address to symbol table should make function return a bool for error checking
+                addSymbolEntry( st, label_name, curr_address );
+            } else {
+                // If its not a label or empty line then it will be an instruction or a directive and these are all 4 bytes so increment by 4
+                curr_address += ADDR_INCREMENT;
+            }
         }
-
     }
     
-    // Stnadard error checking
-    if (feof(file)) {
-        fprintf(stdout, "Reached end of file.\n");
-        fclose(file);
-        return false;
-    } else if (ferror(file)) {
+    // Standard error checking
+    if (ferror(file)) {
         fprintf(stderr, "Error reading from file");
         fclose(file);
         return false;
     }
 
     fclose(file);
-    asser(program_size != NULL);
-    // Store the size of the program might be useful
+    // Store the size of the program
+    // program size / ADDR_INCREMENT gives the number of instructions
     *program_size = curr_address;
     return true;
 }
