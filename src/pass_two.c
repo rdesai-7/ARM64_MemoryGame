@@ -5,6 +5,8 @@
 #include "pass_one.h"
 #include "pass_two.h"
 
+#define MAX_TOKENS 10
+
 bool is_directive(char *s) {
     return strncmp(s, ".int", 4) == 0;
 }
@@ -17,7 +19,21 @@ uint32_t parse_directive(char *line) {
     return (uint32_t) value;
 }
 
-void run_pass_two( const char *filename, SymbolTable_t st) {
+void tokenize(char *str, char *delim, char *tokens[], int *num_tokens) {
+    char *token;
+    char *save_ptr = NULL;
+    int curr_token_count = 0;
+
+    token = strtok_r(str, delim, &save_ptr);
+    while (token != NULL) {
+        tokens[curr_token_count] = token;
+        curr_token_count++;
+        token = strtok_r(NULL, delim, &save_ptr);
+    }
+    *num_tokens = curr_token_count;
+}
+
+void run_pass_two( const char *filename, ARM_STATE *state) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
         fprintf(stderr, "Error Opening File");
@@ -25,28 +41,31 @@ void run_pass_two( const char *filename, SymbolTable_t st) {
     }
 
     char line_buffer[LINE_BUFFER];
-    uint32_t curr_address = 0x0;
+    uint32_t curr_address = state->currAddress;
 
     while( fgets(line_buffer, sizeof(line_buffer), file) != NULL ) {
         char *line = trim_whitespace(line_buffer);
         char label_name[MAX_LABEL_LENGTH];
 
-        if( !is_line_empty(line) && !is_label(line,label_name)) {
+        if( !is_line_empty(line) && !is_label(line, label_name)) {
 
             //deal with .int directives
             if (is_directive(line)) {
                 uint32_t N = parse_directive(line);
-                // idk what to do here...
-                // store N at the curr_address i think. how do you write that in binary though?
+                state->binaryInstructions[currAddress] = N;
+            } else {
+                //all other instructions
+                
+                //Tokenise the line
+                char *tokens[MAX_TOKENS];
+                int num_tokens = 0;
+                //char line_buffer[256];
+                //strcpy(line_buffer, line);
+                tokenize(line, ", ", tokens, &num_tokens);
+
+                //parse each instruction
+                //call a parse function that calls one of 4 separate parse functions depending on instruction type
             }
-
-            //split into tokens
-
-            //parse each instruction
-
-            //call a parse function that calls one of 4 separate parse functions depending on instruction type
-
-
             curr_address += ADDR_INCREMENT;
         }
     }

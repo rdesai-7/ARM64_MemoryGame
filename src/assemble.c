@@ -38,6 +38,7 @@ int main(int argc, char **argv) {
   initialise(&state, num_instructions, symbol_table);
 
   //run second pass, passing in state
+  //bool pass_two = run_pass_two(input_filename, &state);
 
   return EXIT_SUCCESS;
 }
