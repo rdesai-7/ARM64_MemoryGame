@@ -1,14 +1,14 @@
-# Makefile for the 'assemble' target
+# Makefile for the 'emulate' target
 CC      ?= gcc
 CFLAGS  ?= -std=c17 -g \
             -D_POSIX_SOURCE -D_DEFAULT_SOURCE \
             -Wall -Werror -pedantic
 
 # Executable target
-TARGET = assemble
+TARGET = emulate
 
 # Object files for the target
-OBJS = assemble.o pass_one.o symbol_table.o
+OBJS = emulate.o instr_decode.o instr_execute.o bit_shifts.o
 
 .SUFFIXES: .c .o
 
@@ -17,7 +17,7 @@ OBJS = assemble.o pass_one.o symbol_table.o
 # Default target
 all: $(TARGET)
 
-# Build the assemble executable
+# Build the emulator executable
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 

@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <symbol_table_h>
+#include "symbol_table.h"
 
 int main(int argc, char **argv) {
   if (argc != 3) { 

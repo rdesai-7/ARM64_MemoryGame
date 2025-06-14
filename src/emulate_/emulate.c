@@ -6,7 +6,7 @@
 #include "instr_execute.h"
 
 //Helper function to extract bits
-uint32_t get_bits( uint32_t source, int start_bit, int end_bit ) {
+uint32_t get_bits(uint32_t source, int start_bit, int end_bit) {
     int length = start_bit - end_bit + 1;
     uint32_t mask = (1U << length) - 1;
     return (source >> end_bit) & mask;
@@ -29,16 +29,17 @@ uint64_t get_reg_val(ARM_STATE *state, uint8_t reg_id, bool is_64_bit) {
 }
 
 void set_reg_val(ARM_STATE *state, uint8_t reg_id, uint64_t value, bool is_64_bit) {
-    if (reg_id == NUM_GPR) { // Writes to Zero Register are ignored
-        fprintf(state->output, "zero reg found, so set is ignored"); // REMOVE TS
-        return;
-    }
     if (reg_id > NUM_GPR) {
         fprintf(stderr, "Index out of bounds %u for write.\n", reg_id);
         return; 
     }
 
-    fprintf(state->output, "I AM SETTING SOMETHING TO A REGISTER NOW! \n"); // REMOVE TS
+    if (reg_id == NUM_GPR) { // Writes to Zero Register are ignored
+        fprintf(state->output, "zero reg found, so set is ignored");
+        return;
+    }
+    
+
     if (is_64_bit) {
         state->registers[reg_id] = value;
     } else {
@@ -46,9 +47,9 @@ void set_reg_val(ARM_STATE *state, uint8_t reg_id, uint64_t value, bool is_64_bi
     }
 }
 
-uint64_t loadMemory(ARM_STATE *state, uint32_t addr, bool is_64_bit) {
+uint64_t load_memory(ARM_STATE *state, uint32_t addr, bool is_64_bit) {
   if (is_64_bit) {
-    return (uint64_t) ((uint64_t)state->memory[addr + 7] << 56) |
+    return ((uint64_t)state->memory[addr + 7] << 56) |
            ((uint64_t)state->memory[addr + 6] << 48) |
            ((uint64_t)state->memory[addr + 5] << 40) |
            ((uint64_t)state->memory[addr + 4] << 32) |
@@ -57,14 +58,14 @@ uint64_t loadMemory(ARM_STATE *state, uint32_t addr, bool is_64_bit) {
            ((uint64_t)state->memory[addr + 1] << 8) |
            ((uint64_t)state->memory[addr]);
   } else {
-    return (uint32_t) ((uint32_t)state->memory[addr + 3] << 24) |
-                    ((uint32_t)state->memory[addr + 2] << 16) |
-                    ((uint32_t)state->memory[addr + 1] << 8) |
-                    ((uint32_t)state->memory[addr]);
+    return ((uint32_t)state->memory[addr + 3] << 24) |
+           ((uint32_t)state->memory[addr + 2] << 16) |
+           ((uint32_t)state->memory[addr + 1] << 8) |
+           ((uint32_t)state->memory[addr]);
   }
-} //NO TYPECASTING NEEDED??
+}
 
-void storeMemory(ARM_STATE *state, uint32_t addr, bool is_64_bit, uint64_t value) {
+void store_memory(ARM_STATE *state, uint32_t addr, bool is_64_bit, uint64_t value) {
   if (is_64_bit) {
     state->memory[addr + 7] = value >> 56;
     state->memory[addr + 6] = (value << 8) >> 56;
@@ -73,17 +74,17 @@ void storeMemory(ARM_STATE *state, uint32_t addr, bool is_64_bit, uint64_t value
     state->memory[addr + 3] = (value << 32) >> 56;
     state->memory[addr + 2] = (value << 40) >> 56;
     state->memory[addr + 1] = (value << 48) >> 56;
-    state->memory[addr] = (value << 56) >> 56;
+    state->memory[addr]     = (value << 56) >> 56;
   } else {
-    value = (uint32_t)value;
-    state->memory[addr + 3] = value >> 24;
-    state->memory[addr + 2] = (value << 8) >> 24;
-    state->memory[addr + 1] = (value << 16) >> 24;
-    state->memory[addr] = (value << 24) >> 24;
+    uint32_t value_32 = (uint32_t)value;
+    state->memory[addr + 3] = value_32 >> 24;
+    state->memory[addr + 2] = (value_32 << 8) >> 24;
+    state->memory[addr + 1] = (value_32 << 16) >> 24;
+    state->memory[addr]     = (value_32 << 24) >> 24;
   }
 }
 
-void initialise ( ARM_STATE *state ) {
+void initialise(ARM_STATE *state) {
   memset(state->memory, 0, MEM_SIZE);
   memset(state->registers, 0, sizeof(state->registers));
   memset(&state->decoded, 0, sizeof(state->decoded));
@@ -104,10 +105,7 @@ void fetch (ARM_STATE *state) {
      fprintf(stderr, "Error: PC 0x%08lx is out of bounds\n", state->pc);
   }
   //get instruction
-  state->instruction = (state->memory[state->pc + 3] << 24) |
-                      (state->memory[state->pc + 2] << 16) |
-                      (state->memory[state->pc + 1] << 8) |
-                      (state->memory[state->pc]);
+  state->instruction = load_memory(state, state->pc, false);
   fprintf(stdout, "%x", state->instruction);
   if (state->instruction == HALT_INSTRUCTION) {
     state->halt_flag = true;
@@ -120,7 +118,7 @@ void incrementPC (ARM_STATE *state) {
   }
 }
 
-instr_type getInstructionType (uint32_t instr) {
+instr_t getInstructionType (uint32_t instr) {
   if (get_bits(instr, 28, 26) == 0x4) {
     return DP_IMMEDIATE;
   } else if (get_bits(instr, 27, 25) == 0x5) {
@@ -141,13 +139,11 @@ bool readBinary ( ARM_STATE *state, const char *filename ) {
     }
     size_t nbytes_read =  fread(state->memory, 1, MEM_SIZE, file);
 
-    if (ferror(file) != 0) { //
+    if (ferror(file) != 0) {
       fprintf(stderr, "Error Reading File");
       fclose(file);
       return false;
   }
-
-  printf("We have read %zu bytes from file %s into memory", nbytes_read, filename);
 
   fclose(file);
   return true;
@@ -188,10 +184,6 @@ int main(int argc, char *argv[]) {
 
   ARM_STATE state;
   initialise(&state);
-
-  // if (state == NULL) {
-  //  return EXIT_FAILURE; //some sort of initialisation failure
-  // }
 
   //edit output based on optional file
   if (output_filename != NULL) {

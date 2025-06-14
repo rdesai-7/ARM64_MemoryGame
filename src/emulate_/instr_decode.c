@@ -5,7 +5,7 @@
 #include "instr_decode.h"
 
 //DECODE FUNCTIONS
-void decodeDPImmediate ( DECODED_INSTR *decoded, uint32_t instr ) {
+void decodeDPImmediate(DECODED_INSTR *decoded, uint32_t instr) {
   decoded->sf  = get_bits(instr, 31, 31);
   decoded->opc = get_bits(instr, 30, 29);
   decoded->opi = get_bits(instr, 25, 23);
@@ -21,7 +21,7 @@ void decodeDPImmediate ( DECODED_INSTR *decoded, uint32_t instr ) {
   }
 }
 
-void decodeDPRegister ( DECODED_INSTR *decoded, uint32_t instr ) {
+void decodeDPRegister(DECODED_INSTR *decoded, uint32_t instr) {
   decoded->sf  = get_bits(instr, 31, 31);
   decoded->opc = get_bits(instr, 30, 29); 
   decoded->M   = get_bits(instr, 28, 28);
@@ -43,9 +43,7 @@ void decodeDPRegister ( DECODED_INSTR *decoded, uint32_t instr ) {
   }
 }
 
-//potentially have an instr_subtype field in decoded instruction to avoid checking again in execute?
-
-void decodeLoadStore ( DECODED_INSTR *decoded, uint32_t instr ) {
+void decodeLoadStore(DECODED_INSTR *decoded, uint32_t instr) {
   decoded->sf = get_bits(instr, 30, 30);
   decoded->rt = get_bits(instr, 4, 0);
   //check if sdt or load literal
@@ -57,7 +55,7 @@ void decodeLoadStore ( DECODED_INSTR *decoded, uint32_t instr ) {
     decoded->xn     = get_bits(instr, 9, 5);
 
      // decide addressing mode
-     if (decoded->U == 1) {
+    if (decoded->U == 1) {
       decoded->addr_mode = U_OFFSET;
     } else if (get_bits(instr, 21, 21) == 1) {
       decoded->addr_mode = REG_OFFSET;
@@ -82,7 +80,6 @@ void decodeLoadStore ( DECODED_INSTR *decoded, uint32_t instr ) {
 }
 
 void decodeBranch ( DECODED_INSTR *decoded, uint32_t instr ) {
-  //decoded->branch_type = get_bits(instr, 31, 29);
   switch (get_bits(instr, 31, 29)) {
     case 0x0: //unconditional
       decoded->simm26 =((int32_t)(get_bits(instr, 25, 0) << 6) >> 6);
@@ -104,12 +101,10 @@ void decodeBranch ( DECODED_INSTR *decoded, uint32_t instr ) {
 
 void decode (ARM_STATE *state) {
   uint32_t instruction = state->instruction;
-  //DECODED_INSTR decoded = state->decoded;
   if (state->halt_flag) {
     return;
   } else {
-    instr_type type = getInstructionType(instruction);
-    // POTENTIALLY PASS POINTERS TO FUNCTION FOR EFFICIENCY 
+    instr_t type = getInstructionType(instruction);
     func_decode decodeFunctions[] = {decodeDPImmediate, decodeDPRegister, decodeLoadStore, decodeBranch};
     decodeFunctions[type](&state->decoded, instruction);
     state->instruction_type = type;

@@ -1,5 +1,4 @@
 // header file for the state of the ARMV8 Machine
-
 #ifndef EMULATOR_STATE_H
 #define EMULATOR_STATE_H
 
@@ -28,20 +27,20 @@ typedef enum {
     DP_REGISTER,
     LOAD_STORE,
     BRANCH
-} instr_type;
+} instr_t;
 
 //Branch Types
 typedef enum {
     UNCOND,
     REG,
     COND
-} branch_types;
+} branch_t;
 
 // Load Store Types
 typedef enum {
     SDT,
     LOADLITERAL
-} loadstore_types;
+} loadstore_t;
 
 // Addressing Modes
 typedef enum {
@@ -49,7 +48,26 @@ typedef enum {
     PRE_INDEXED,
     POST_INDEXED,
     REG_OFFSET
-} addr_modes;
+} addrmode_t;
+
+//Shift types
+typedef enum {
+    LSL,
+    LSR,
+    ASR,
+    ROR,
+} shift_type_t;
+
+//Conditions
+typedef enum {
+  EQ = 0,
+  NE = 1,
+  GE = 10,
+  LT = 11,
+  GT = 12,
+  LE = 13,
+  AL = 14,
+} cond_t;
 
 //Decoded Instruction
 typedef struct {
@@ -91,9 +109,9 @@ typedef struct {
     int32_t simm26;
     uint8_t cond;
 
-    branch_types branch_type;
-    loadstore_types loadstore_type;
-    addr_modes addr_mode;
+    branch_t branch_type;
+    loadstore_t loadstore_type;
+    addrmode_t addr_mode;
     
 } DECODED_INSTR; 
 
@@ -104,7 +122,7 @@ typedef struct {
     uint64_t pc;
     uint32_t instruction;
     DECODED_INSTR decoded;
-    instr_type instruction_type;
+    instr_t instruction_type;
     PSTATE_Flags pstate;
     bool halt_flag;
     FILE *output;
@@ -114,8 +132,12 @@ typedef struct {
 uint32_t get_bits( uint32_t source, int start_bit, int end_bit );
 uint64_t get_reg_val(ARM_STATE *state, uint8_t reg_id, bool is_64_bit);
 void set_reg_val(ARM_STATE *state, uint8_t reg_id, uint64_t value, bool is_64_bit);
-instr_type getInstructionType (uint32_t instr);
-void storeMemory(ARM_STATE *state, uint32_t addr, bool is_64_bit, uint64_t value);
-uint64_t loadMemory(ARM_STATE *state, uint32_t addr, bool is_64_bit) ;
+instr_t getInstructionType (uint32_t instr);
+void store_memory(ARM_STATE *state, uint32_t addr, bool is_64_bit, uint64_t value);
+uint64_t load_memory(ARM_STATE *state, uint32_t addr, bool is_64_bit) ;
+
+void initialise(ARM_STATE *state);
+void fetch (ARM_STATE *state);
+void incrementPC (ARM_STATE *state);
 
 #endif
