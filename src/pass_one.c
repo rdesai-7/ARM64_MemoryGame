@@ -8,8 +8,6 @@
 #include "symbol_table.h"
 #include "pass_one.h"
 
-#define ADDR_INCREMENT 4
-
 char* trim_whitespace(char *s) {
 
     while( isspace(*s) ) s++;

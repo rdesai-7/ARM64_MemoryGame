@@ -1,2 +1,2 @@
 #define LINE_BUFFER 256
-#define ADDR_INCREMENT 0x4
+#define ADDR_INCREMENT 4
