@@ -147,9 +147,6 @@ void executeLoadStore( ARM_STATE *state) {
     bool sf = dec_instr.sf;
     uint64_t addr;
     int64_t new_simm9;
-    fprintf(state->output, "LOAD STORE INSTRUCTION");//REMOVE TS
-    fprintf(state->output, "instr type is %d \n", dec_instr.loadstore_type);//REMOVE TS
-    fprintf(state->output, "address mode is %d \n", dec_instr.addr_mode);//REMOVE TS
 
     switch (dec_instr.loadstore_type) {
         case SDT:
@@ -171,12 +168,8 @@ void executeLoadStore( ARM_STATE *state) {
                     set_reg_val(state, dec_instr.xn, addr, true);
                     break;
                 case POST_INDEXED:
-                    fprintf(state->output, "POST INDEXED");//REMOVE TS
                     addr = (int64_t)get_reg_val(state, dec_instr.xn, true);
                     new_simm9 = (int64_t)(dec_instr.simm9);
-                    fprintf(state->output, "orig simm9 is %d \n", dec_instr.simm9);//REMOVE TS
-                    fprintf(state->output, "addr is %ld \n", addr);//REMOVE TS
-                    fprintf(state->output, "simm9 is %ld \n", new_simm9);//REMOVE TS
                     set_reg_val(state, dec_instr.xn, addr + new_simm9 ,true);
                     break;
                 case REG_OFFSET:
@@ -186,24 +179,22 @@ void executeLoadStore( ARM_STATE *state) {
                     break;
             }
 
-            if (dec_instr.L == 1) {
+            if (dec_instr.L) {
                 // load into rt
-                uint64_t val = loadMemory(state, addr, sf);
-                set_reg_val(state,dec_instr.rt, val, sf);
+                uint64_t val = load_memory(state, addr, sf);
+                set_reg_val(state, dec_instr.rt, val, sf);
             } else {
                 // store
                 uint64_t val = get_reg_val(state,dec_instr.rt,true);
-                storeMemory(state, addr, sf, val);
+                store_memory(state, addr, sf, val);
             }
             break;
         case LOADLITERAL: {
-            // sign extend simm19 
-            int32_t simm19_32 = (int32_t)(dec_instr.simm19);
-            int64_t offset = (int64_t)simm19_32 << 2;
+            int64_t offset = (int64_t)dec_instr.simm19 << 2;
             uint64_t start_address = state->pc + offset;
 
             // load the value into rt
-            uint64_t val = loadMemory(state,start_address,sf);
+            uint64_t val = load_memory(state, start_address, sf);
             set_reg_val(state, dec_instr.rt, val, sf);
             break;
         }
@@ -217,10 +208,7 @@ void executeBranch( ARM_STATE *state) {
     int64_t offset;
     switch (dec_instr.branch_type) {
         case UNCOND:;
-            // sign extend simm26 
-            int32_t simm26_32 = (int32_t)(dec_instr.simm26);
-            offset = (int64_t)simm26_32 << 2;
-            // add offset to PC
+            offset = (int64_t)dec_instr.simm26 << 2;
             state->pc += offset;
             break;
         case REG:
@@ -228,10 +216,7 @@ void executeBranch( ARM_STATE *state) {
             state->pc = get_reg_val(state,dec_instr.xn,true);
             break;
         case COND:;
-            // sign extend simm19 
-            int32_t simm19_32 = (int32_t)(dec_instr.simm19);
-            offset = (int64_t)simm19_32 << 2;
-
+            offset = (int64_t)dec_instr.simm19 << 2;
             // add offset if cond is met
             if (check_branch_cond(dec_instr.cond,state->pstate)){
                 state->pc += offset;
@@ -243,57 +228,25 @@ void executeBranch( ARM_STATE *state) {
 }
 
 bool check_branch_cond(uint8_t cond, PSTATE_Flags pstate){
-    switch (cond){
-        case 0x0:
-            // check EQ
+    cond_t condition = (cond_t) cond;
+    switch (condition) {
+        case EQ:
             return (pstate.Z == 1);
-        case 0x1:
-            // check NE
+        case NE:
             return (pstate.Z == 0);
-        case 0xA:
-            // check GE
+        case GE:
             return (pstate.N == pstate.V);
-        case 0xB:
-            // check LT
+        case LT:
             return (pstate.N != pstate.V);
-        case 0xC:
-            // check GT
+        case GT:
             return (pstate.Z == 0 && pstate.N == pstate.V);
-        case 0xD:
-            // check LE
+        case LE:
             return !(pstate.Z == 0 && pstate.N == pstate.V);
-        case 0xE:
-            // AL: always true
+        case AL:
             return true;
         default:
             fprintf(stderr, "Unknown condition type");
             return false;
-    }
-}
-
-typedef enum {
-    LSL,
-    LSR,
-    ASR,
-    ROR,
-} Shift_type_t;
-
-Shift_type_t getShiftType( uint8_t shift ) {
-    switch (shift) {
-    case 0x0:
-        return LSL;
-        break;
-    case 0x1:
-        return LSR;
-        break;
-    case 0x2:
-        return ASR;
-        break;
-    case 0x3:
-        return ROR;
-    default:
-        return LSL;
-        break;
     }
 }
 
@@ -318,51 +271,23 @@ void executeDPRegister( ARM_STATE *state) {
     uint64_t rm_val = get_reg_val(state, dec_instr.rm, is_64_bit);
     // ARITHMETIC AND LOGICAL OPS
     if ( dec_instr.M == 0 ) {
-        //Check if its 32 bit the operation is the correct size
-        //THIS IS WRONG
-        //if (!is_64_bit && dec_instr.operand) {
-            //fprintf(stderr, "Shift Amount greater than 32 bits");
-            //state->halt_flag = true;
-            //return;
-        //}
-
-        Shift_type_t shift_type = getShiftType(dec_instr.shift);
-
+        shift_type_t shift_type = dec_instr.shift;
         bool is_arith = dec_instr.opr >> 3; // Get msb of opr
 
         if (is_arith) {
             // Check rotate instruction isnt used
-            if (shift_type == 3) {
+            if (shift_type == ROR) {
                 fprintf(stderr, "Rotate instruction invalid for arithmetic");
                 state->halt_flag = true;
                 return;
             }
         }
 
-        shift_func_t shift_func = NULL;
-        uint64_t op2 = 0;
-
-        switch (shift_type) {
-        case LSL:
-            shift_func = &lsl;
-            break;
-        case LSR:
-            shift_func = &lsr;
-            break;
-        case ASR:
-            shift_func = &asr;
-            break;
-        case ROR:
-            shift_func = &ror;
-            break;
-        default:
-            break;
-        }
-
-        op2 = (*shift_func) (rm_val, dec_instr.operand, is_64_bit);
+        func_shift shiftFunctions[] = {lsl, lsr, asr, ror};
+        uint64_t op2 = shiftFunctions[shift_type](rm_val, dec_instr.operand, is_64_bit);
 
         //Check if it needs to be negated
-        if (!is_arith && dec_instr.N == 1) {
+        if (!is_arith && dec_instr.N) {
             op2 = ~op2;
             if (!is_64_bit) {
                 op2 = (uint32_t)op2;
@@ -402,7 +327,7 @@ void executeDPRegister( ARM_STATE *state) {
             if (update_flags) {
                 update_pstate_arith( state,  rn_val, op2, result, is_sub, is_64_bit );
             }
-        } else {//Bit logic
+        } else { //Bit logic
             switch (dec_instr.opc) {
             case 0x0:
                 result = rn_val & op2;
@@ -450,6 +375,5 @@ void execute(ARM_STATE *state) {
         return;
     }
     func_execute executeFunctions[] = {executeDPImmediate, executeDPRegister, executeLoadStore, executeBranch};
-    fprintf(state->output, "instruction type is %d \n", state->instruction_type);//REMOVE TS
     executeFunctions[state->instruction_type](state);
 }

@@ -1,5 +1,4 @@
 // header file for the state of the ARMV8 Machine
-
 #ifndef EMULATOR_STATE_H
 #define EMULATOR_STATE_H
 
@@ -50,6 +49,25 @@ typedef enum {
     POST_INDEXED,
     REG_OFFSET
 } addr_modes;
+
+//Shift types
+typedef enum {
+    LSL,
+    LSR,
+    ASR,
+    ROR,
+} shift_type_t;
+
+//Conditions
+typedef enum {
+  EQ = 0,
+  NE = 1,
+  GE = 10,
+  LT = 11,
+  GT = 12,
+  LE = 13,
+  AL = 14,
+} cond_t;
 
 //Decoded Instruction
 typedef struct {
@@ -115,7 +133,7 @@ uint32_t get_bits( uint32_t source, int start_bit, int end_bit );
 uint64_t get_reg_val(ARM_STATE *state, uint8_t reg_id, bool is_64_bit);
 void set_reg_val(ARM_STATE *state, uint8_t reg_id, uint64_t value, bool is_64_bit);
 instr_type getInstructionType (uint32_t instr);
-void storeMemory(ARM_STATE *state, uint32_t addr, bool is_64_bit, uint64_t value);
-uint64_t loadMemory(ARM_STATE *state, uint32_t addr, bool is_64_bit) ;
+void store_memory(ARM_STATE *state, uint32_t addr, bool is_64_bit, uint64_t value);
+uint64_t load_memory(ARM_STATE *state, uint32_t addr, bool is_64_bit) ;
 
 #endif
