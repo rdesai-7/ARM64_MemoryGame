@@ -6,7 +6,7 @@
 #include "instr_execute.h"
 
 //Helper function to extract bits
-uint32_t get_bits( uint32_t source, int start_bit, int end_bit ) {
+uint32_t get_bits(uint32_t source, int start_bit, int end_bit) {
     int length = start_bit - end_bit + 1;
     uint32_t mask = (1U << length) - 1;
     return (source >> end_bit) & mask;
@@ -84,7 +84,7 @@ void store_memory(ARM_STATE *state, uint32_t addr, bool is_64_bit, uint64_t valu
   }
 }
 
-void initialise ( ARM_STATE *state ) {
+void initialise(ARM_STATE *state) {
   memset(state->memory, 0, MEM_SIZE);
   memset(state->registers, 0, sizeof(state->registers));
   memset(&state->decoded, 0, sizeof(state->decoded));
@@ -105,10 +105,7 @@ void fetch (ARM_STATE *state) {
      fprintf(stderr, "Error: PC 0x%08lx is out of bounds\n", state->pc);
   }
   //get instruction
-  state->instruction = (state->memory[state->pc + 3] << 24) |
-                      (state->memory[state->pc + 2] << 16) |
-                      (state->memory[state->pc + 1] << 8) |
-                      (state->memory[state->pc]);
+  state->instruction = load_memory(state, state->pc, false);
   fprintf(stdout, "%x", state->instruction);
   if (state->instruction == HALT_INSTRUCTION) {
     state->halt_flag = true;
@@ -121,7 +118,7 @@ void incrementPC (ARM_STATE *state) {
   }
 }
 
-instr_type getInstructionType (uint32_t instr) {
+instr_t getInstructionType (uint32_t instr) {
   if (get_bits(instr, 28, 26) == 0x4) {
     return DP_IMMEDIATE;
   } else if (get_bits(instr, 27, 25) == 0x5) {
@@ -142,13 +139,11 @@ bool readBinary ( ARM_STATE *state, const char *filename ) {
     }
     size_t nbytes_read =  fread(state->memory, 1, MEM_SIZE, file);
 
-    if (ferror(file) != 0) { //
+    if (ferror(file) != 0) {
       fprintf(stderr, "Error Reading File");
       fclose(file);
       return false;
   }
-
-  printf("We have read %zu bytes from file %s into memory", nbytes_read, filename);
 
   fclose(file);
   return true;
@@ -189,10 +184,6 @@ int main(int argc, char *argv[]) {
 
   ARM_STATE state;
   initialise(&state);
-
-  // if (state == NULL) {
-  //  return EXIT_FAILURE; //some sort of initialisation failure
-  // }
 
   //edit output based on optional file
   if (output_filename != NULL) {

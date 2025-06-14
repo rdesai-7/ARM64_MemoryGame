@@ -15,8 +15,9 @@ typedef uint64_t (*func_shift) ( uint64_t operand, uint8_t sh_amt, bool is_64_bi
 //Helper functions
 bool get_msb(uint64_t value, bool is_64bit);
 void update_pstate_arith( ARM_STATE *state, uint64_t operand1, uint64_t operand2, uint64_t result, bool is_sub, bool is_64_bit );
-extern bool check_branch_cond(uint8_t cond, PSTATE_Flags pstate);
 void update_pstate_logical( ARM_STATE *state, uint64_t result, bool is_64_bit );
+extern bool check_branch_cond(uint8_t cond, PSTATE_Flags pstate);
+
 
 //Execute functions
 extern void execute(ARM_STATE *state);

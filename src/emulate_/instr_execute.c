@@ -14,7 +14,7 @@ bool get_msb(uint64_t value, bool is_64bit) {
     }
 }
 
-void update_pstate_arith( ARM_STATE *state, uint64_t operand1, uint64_t operand2, uint64_t result, bool is_sub, bool is_64_bit ) {
+void update_pstate_arith(ARM_STATE *state, uint64_t operand1, uint64_t operand2, uint64_t result, bool is_sub, bool is_64_bit ) {
     if (is_64_bit) {
         state->pstate.Z = (result == 0);
         state->pstate.N = get_msb(result, true);
@@ -57,12 +57,26 @@ void update_pstate_arith( ARM_STATE *state, uint64_t operand1, uint64_t operand2
     }
 }
 
-void executeDPImmediate( ARM_STATE *state) {
+void update_pstate_logical(ARM_STATE *state, uint64_t result, bool is_64_bit ) {
+    if (is_64_bit) {
+        state->pstate.Z = (result == 0);
+        state->pstate.N = get_msb(result, true);
+    } else {
+        uint32_t result32bit = (uint32_t)result;
+        state->pstate.Z = (result32bit == 0);
+        state->pstate.N = get_msb(result32bit, false);
+    }
+    
+    state->pstate.C = 0;
+    state->pstate.V = 0;
+}
+
+void executeDPImmediate(ARM_STATE *state) {
     DECODED_INSTR dec_instr = state->decoded;
     bool is_64_bit = dec_instr.sf;
 
     if (dec_instr.opi == 0x2) {
-        if (dec_instr.sh == 1) {
+        if (dec_instr.sh) {
                 dec_instr.imm12 <<= 12;
         }
 
@@ -101,8 +115,7 @@ void executeDPImmediate( ARM_STATE *state) {
 
     } else if (dec_instr.opi == 0x5) {
         // Wide Move
-
-        if (is_64_bit == 0) {
+        if (!is_64_bit) {
             if (!(dec_instr.hw == 0x0 || dec_instr.hw == 0x1)) {
                 fprintf(stderr, "Invalid opcode for 32 bit register");
                 return;
@@ -115,34 +128,34 @@ void executeDPImmediate( ARM_STATE *state) {
         uint64_t og_rd_val = 0;
 
         switch (dec_instr.opc) {
-        case 0x0:
-            if (is_64_bit) {
-                new_rd_val = ~op;
-            } else {// for 32 bit
-                new_rd_val = ~((uint32_t)op);
-            }
-            // SET REGISTER VALUE
-            set_reg_val(state, dec_instr.rd, new_rd_val, is_64_bit);
-            break;
-        case 0x2:
-            // PUT OPERAND IN REGISTER
-            set_reg_val(state, dec_instr.rd, op, is_64_bit);
-            break;
-        case 0x3:
-            //GET CURRENT VALUE OF RD REGISTER
-            og_rd_val = get_reg_val(state, dec_instr.rd, is_64_bit);
-            uint64_t mask = ~((uint64_t)0xFFFF << sh_amt); // Creates a mask of 0s to clear the required bits 
-            og_rd_val &= mask;
-            new_rd_val = og_rd_val | op;
-            // SET REGISTER VALUE
-            set_reg_val( state, dec_instr.rd, new_rd_val, is_64_bit );
-        default:
-            break;
+            case 0x0:
+                if (is_64_bit) {
+                    new_rd_val = ~op;
+                } else {// for 32 bit
+                    new_rd_val = ~((uint32_t)op);
+                }
+                // SET REGISTER VALUE
+                set_reg_val(state, dec_instr.rd, new_rd_val, is_64_bit);
+                break;
+            case 0x2:
+                // PUT OPERAND IN REGISTER
+                set_reg_val(state, dec_instr.rd, op, is_64_bit);
+                break;
+            case 0x3:
+                //GET CURRENT VALUE OF RD REGISTER
+                og_rd_val = get_reg_val(state, dec_instr.rd, is_64_bit);
+                uint64_t mask = ~((uint64_t)0xFFFF << sh_amt); // Creates a mask of 0s to clear the required bits 
+                og_rd_val &= mask;
+                new_rd_val = og_rd_val | op;
+                // SET REGISTER VALUE
+                set_reg_val( state, dec_instr.rd, new_rd_val, is_64_bit );
+            default:
+                break;
         }
     }
 }
 
-void executeLoadStore( ARM_STATE *state) {
+void executeLoadStore(ARM_STATE *state) {
     DECODED_INSTR dec_instr = state->decoded;
     bool sf = dec_instr.sf;
     uint64_t addr;
@@ -189,6 +202,7 @@ void executeLoadStore( ARM_STATE *state) {
                 store_memory(state, addr, sf, val);
             }
             break;
+
         case LOADLITERAL: {
             int64_t offset = (int64_t)dec_instr.simm19 << 2;
             uint64_t start_address = state->pc + offset;
@@ -203,7 +217,7 @@ void executeLoadStore( ARM_STATE *state) {
     }
 }
 
-void executeBranch( ARM_STATE *state) {
+void executeBranch(ARM_STATE *state) {
     DECODED_INSTR dec_instr = state->decoded;
     int64_t offset;
     switch (dec_instr.branch_type) {
@@ -250,27 +264,13 @@ bool check_branch_cond(uint8_t cond, PSTATE_Flags pstate){
     }
 }
 
-void update_pstate_logical( ARM_STATE *state, uint64_t result, bool is_64_bit ) {
-    if (is_64_bit) {
-        state->pstate.Z = (result == 0);
-        state->pstate.N = get_msb(result, true);
-    } else {
-        uint32_t result32bit = (uint32_t)result;
-        state->pstate.Z = (result32bit == 0);
-        state->pstate.N = get_msb(result32bit, false);
-    }
-    
-    state->pstate.C = 0;
-    state->pstate.V = 0;
-}
-
 void executeDPRegister( ARM_STATE *state) {
     DECODED_INSTR dec_instr = state->decoded;
     bool is_64_bit = dec_instr.sf;
     uint64_t rn_val = get_reg_val(state, dec_instr.rn, is_64_bit);
     uint64_t rm_val = get_reg_val(state, dec_instr.rm, is_64_bit);
     // ARITHMETIC AND LOGICAL OPS
-    if ( dec_instr.M == 0 ) {
+    if ( !dec_instr.M ) {
         shift_type_t shift_type = dec_instr.shift;
         bool is_arith = dec_instr.opr >> 3; // Get msb of opr
 
