@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "symbol_table.h"
 #include "pass_one.h"
+#include "pass_two.h"
 
 bool is_directive(char *s) {
     return strncmp(s, ".int", 4) == 0;
