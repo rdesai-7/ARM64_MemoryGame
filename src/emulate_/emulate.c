@@ -145,6 +145,8 @@ bool readBinary ( ARM_STATE *state, const char *filename ) {
       return false;
   }
 
+  printf("We have read %zu bytes from file %s into memory", nbytes_read, filename);
+
   fclose(file);
   return true;
 }

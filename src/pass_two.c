@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "symbol_table.h"
 #include "pass_one.h"
+#include "pass_two.h"
 
 bool is_directive(char *s) {
     return strncmp(s, ".int", 4) == 0;
@@ -15,7 +16,6 @@ uint32_t parse_directive(char *line) {
     assert(sscanf(line, ".int %i", &value) == 1);
     return (uint32_t) value;
 }
-
 
 void run_pass_two( const char *filename, SymbolTable_t st) {
     FILE *file = fopen(filename, "r");

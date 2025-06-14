@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include "symbol_table.h"
 #include "pass_one.h"
+#include "pass_two.h"
 
 char* trim_whitespace(char *s) {
 
