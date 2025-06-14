@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -12,6 +13,17 @@ void initialise( ARM_STATE *state, int numInstructions, SymbolTable_t st) {
   state->numInstructions = numInstructions;
   state->currAddress     = 0x0;
   state->symbolTable     = st;
+}
+
+void write_binary(const char *filename, ARM_STATE *state) {
+  FILE *file = fopen(filename, "w");
+  assert (file != NULL);
+  uint32_t *instructions = state->binaryInstructions;
+
+  for (int i = 0; i < state->numInstructions; i++) {
+    fwrite(&instructions[i], 4, 1, file);
+  }
+  fclose(file);
 }
 
 int main(int argc, char **argv) {
@@ -38,7 +50,13 @@ int main(int argc, char **argv) {
   initialise(&state, num_instructions, symbol_table);
 
   //run second pass, passing in state
-  //bool pass_two = run_pass_two(input_filename, &state);
+  bool pass_two = run_pass_two(input_filename, &state);
+  if (!pass_two) {
+    fprintf(stderr, "Error running second pass");
+    return EXIT_FAILURE;
+  }
+  
+  write_binary(output_filename, &state);
 
   return EXIT_SUCCESS;
 }

@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
+#include <assert.h>
 #include "symbol_table.h"
 #include "pass_one.h"
 #include "pass_two.h"
@@ -33,11 +35,11 @@ void tokenize(char *str, char *delim, char *tokens[], int *num_tokens) {
     *num_tokens = curr_token_count;
 }
 
-void run_pass_two( const char *filename, ARM_STATE *state) {
+bool run_pass_two( const char *filename, ARM_STATE *state) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
         fprintf(stderr, "Error Opening File");
-        exit(1);
+        return false;
     }
 
     char line_buffer[LINE_BUFFER];
@@ -52,7 +54,7 @@ void run_pass_two( const char *filename, ARM_STATE *state) {
             //deal with .int directives
             if (is_directive(line)) {
                 uint32_t N = parse_directive(line);
-                state->binaryInstructions[currAddress] = N;
+                state->binaryInstructions[curr_address] = N;
             } else {
                 //all other instructions
                 
@@ -74,10 +76,11 @@ void run_pass_two( const char *filename, ARM_STATE *state) {
     if (ferror(file)) {
         fprintf(stderr, "Error reading from file");
         fclose(file);
-        exit(1);
+        return false;
     }
 
     fclose(file);
+    return true;
 }
 
 
