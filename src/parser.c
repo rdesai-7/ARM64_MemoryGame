@@ -1,10 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 #include "parser.h"
-
-// CHECK IF REGISTER IS W OR X WHEN CALLING 0 REGISTER FOR ALIASES
-// STACK POINTER LOGIC
 
 const InstructionOpcodeData opcode_lookup_table[] = {
     {"and",  0b00, 0},
@@ -60,7 +58,7 @@ static uint32_t parse_register_token(char* reg_token, uint32_t* sf_bit) {
         return ZERO_REGISTER; 
     }
 
-    if (strcmp(reg_token, "SP") == 0 || strcmp(reg_token, "ZR") == 0) {
+    if (strcmp(reg_token, "ZR") == 0) {
         return ZERO_REGISTER; 
     }
 
@@ -92,10 +90,10 @@ int get_add_sub_opcode(const char* mnemonic, uint8_t* op_out, uint8_t* S_out) {
         if (strcmp(mnemonic, add_sub_opcode_table[i].mnemonic) == 0) {
             *op_out = add_sub_opcode_table[i].op_bit;
             *S_out = add_sub_opcode_table[i].S_bit;
-            return 1; // Indicate success
+            return 1;
         }
     }
-    return 0; // Not found
+    return 0;
 }
 
 int get_mov_opcode(const char* mnemonic, uint8_t* opc_out) {
@@ -108,36 +106,28 @@ int get_mov_opcode(const char* mnemonic, uint8_t* opc_out) {
     return 0;
 }
 
-
 uint32_t multiply_assembly(char** tokens, uint32_t token_count) {
     uint32_t rd_reg_num, rn_reg_num, rm_reg_num, ra_reg_num;
-    uint32_t instruction = MUL_INITIAL_STATE; 
-    uint32_t sf_bit;
-
+    uint32_t instruction = MUL_INITIAL_STATE;
+    uint32_t sf_bit = 0;
 
     rd_reg_num = parse_register_token(tokens[1], &sf_bit);
-    rn_reg_num = parse_register_token(tokens[2], &sf_bit);
-    rm_reg_num = parse_register_token(tokens[3], &sf_bit);
-    ra_reg_num = parse_register_token(tokens[4], &sf_bit);
+    rn_reg_num = parse_register_token(tokens[2], NULL);
+    rm_reg_num = parse_register_token(tokens[3], NULL);
+    ra_reg_num = parse_register_token(tokens[4], NULL);
 
-    // sf bit (bit 31)
     instruction |= (sf_bit & 0x1) << 31;
 
-    // rm field (bits 20-16)
     instruction |= (rm_reg_num & 0x1F) << 16;
 
-    // x bit (bit 15) - determines madd (0) or msub (1)
     if (strcmp(tokens[0], "msub") == 0) {
         instruction |= (1 << 15);
     }
 
-    // ra field (bits 14-10)
     instruction |= (ra_reg_num & 0x1F) << 10;
 
-    // rn field (bits 9-5)
     instruction |= (rn_reg_num & 0x1F) << 5;
 
-    // rd field (bits 4-0)
     instruction |= (rd_reg_num & 0x1F) << 0;
 
     return instruction;
@@ -314,9 +304,9 @@ uint32_t mov_wide_assembly(char** tokens, uint32_t token_count) {
     uint32_t rd_reg_num;
     uint8_t opc_val;
     uint32_t imm16_val;
-    uint32_t pos_val;  
-    uint32_t instruction = MOV_INITIAL_STATE; 
-    uint32_t sf_bit;
+    uint32_t pos_val;
+    uint32_t instruction = MOV_INITIAL_STATE;
+    uint32_t sf_bit = 0;
 
     get_mov_opcode(tokens[0], &opc_val);
 
@@ -324,74 +314,84 @@ uint32_t mov_wide_assembly(char** tokens, uint32_t token_count) {
     imm16_val = parse_imm(tokens[2]);
 
     uint32_t shift_amount = 0;
-    if (token_count == 5) { 
-        shift_amount = parse_imm(tokens[4]);
+    if (token_count == 5) {
+        if (strcmp(tokens[3], "LSL") == 0) {
+            shift_amount = parse_imm(tokens[4]);
+        } else {
+            fprintf(stderr, "Error: Invalid shift type for MOV wide. Only LSL is allowed.\n");
+            return 0;
+        }
+    } else if (token_count != 3) {
+         fprintf(stderr, "Error: Invalid token count for MOV wide instruction.\n");
+         return 0;
     }
     pos_val = parse_mov_w_shift_pos(shift_amount);
 
-    instruction |= (sf_bit) << 31;
+    instruction |= (sf_bit & 0x1) << 31;
 
-    instruction |= (opc_val) << 29;
+    instruction |= (opc_val & 0x3) << 29;
 
-    instruction |= (pos_val) << 21; 
+    instruction |= (pos_val & 0x3) << 21;
 
-    instruction |= (imm16_val) << 5; 
+    instruction |= (imm16_val & 0xFFFF) << 5;
 
-    instruction |= (rd_reg_num);
+    instruction |= (rd_reg_num & 0x1F) << 0;
 
     return instruction;
 }
 
 uint32_t cmp_assembly(char** tokens, uint32_t token_count) {
     char* new_tokens[4];
+    uint32_t sf_bit = 0;
+    parse_register_token(tokens[1], &sf_bit);
     new_tokens[0] = "subs";
-    new_tokens[1] = "ZR";
+    new_tokens[1] = "ZR"
     new_tokens[2] = tokens[1];
     new_tokens[3] = tokens[2];
 
     return assemble_add_sub_instruction(new_tokens, 4);
-
 }
 
 uint32_t cmn_assembly(char** tokens, uint32_t token_count) {
     char* new_tokens[4];
+    uint32_t sf_bit = 0;
+    parse_register_token(tokens[1], &sf_bit);
     new_tokens[0] = "adds";
     new_tokens[1] = "ZR";
     new_tokens[2] = tokens[1];
     new_tokens[3] = tokens[2];
 
     return assemble_add_sub_instruction(new_tokens, 4);
-
 }
-
-// SHOULD COMBINE NEG AND NEGS
-
 
 uint32_t neg_assembly(char** tokens, uint32_t token_count) {
     char* new_tokens[4];
+    uint32_t sf_bit = 0;
+    parse_register_token(tokens[1], &sf_bit);
     new_tokens[0] = "sub";
     new_tokens[1] = tokens[1];
     new_tokens[2] = "ZR";
     new_tokens[3] = tokens[2];
 
     return assemble_add_sub_instruction(new_tokens, 4);
-
 }
 
 uint32_t negs_assembly(char** tokens, uint32_t token_count) {
     char* new_tokens[4];
+    uint32_t sf_bit = 0;
+    parse_register_token(tokens[1], &sf_bit);
     new_tokens[0] = "subs";
     new_tokens[1] = tokens[1];
     new_tokens[2] = "ZR";
     new_tokens[3] = tokens[2];
 
     return assemble_add_sub_instruction(new_tokens, 4);
-
 }
 
 uint32_t tst_assembly(char** tokens, uint32_t token_count) {
-    
     char* new_tokens[4];
+    uint32_t sf_bit = 0;
+    parse_register_token(tokens[1], &sf_bit);
     new_tokens[0] = "ands";
     new_tokens[1] = "ZR";
     new_tokens[2] = tokens[1];
@@ -401,47 +401,51 @@ uint32_t tst_assembly(char** tokens, uint32_t token_count) {
 }
 
 uint32_t mvn_assembly(char** tokens, uint32_t token_count) {
-    char* new_tokens[4]; // ORN Rd, XZR, Rn will always be 4 tokens
+    char* new_tokens[4];
+    uint32_t sf_bit = 0;
+    parse_register_token(tokens[1], &sf_bit);
     new_tokens[0] = "orn";
-    new_tokens[1] = tokens[1]; // Rd (destination)
-    new_tokens[2] = "ZR";     // Rn (first source is zero register)
-    new_tokens[3] = tokens[2]; // Rm (second source is original Rn)
+    new_tokens[1] = tokens[1];
+    new_tokens[2] = "ZR";
+    new_tokens[3] = tokens[2];
 
-    return bitwise_logic_assembly(new_tokens, 4);
+    return bit_logic_assembly(new_tokens, 4);
 }
 
-
 uint32_t mov_assembly(char** tokens, uint32_t token_count) {
-    char* new_tokens[4]; // ORR Rd, XZR, Rn will always be 4 tokens
+    char* new_tokens[4];
+    uint32_t sf_bit = 0;
+    parse_register_token(tokens[1], &sf_bit);
     new_tokens[0] = "orr";
-    new_tokens[1] = tokens[1]; // Rd (destination)
-    new_tokens[2] = "ZR";     // Rn (first source is zero register)
-    new_tokens[3] = tokens[2]; // Rm (second source is original Rn)
+    new_tokens[1] = tokens[1];
+    new_tokens[2] = "ZR";
+    new_tokens[3] = tokens[2];
 
-    return bitwise_logic_assembly(new_tokens, 4);
+    return bit_logic_assembly(new_tokens, 4);
 }
 
 uint32_t mul_assembly(char** tokens, uint32_t token_count) {
-    char* new_tokens[5]; // ORN Rd, XZR, Rn will always be 4 tokens
+    char* new_tokens[5];
+    uint32_t sf_bit = 0;
+    parse_register_token(tokens[1], &sf_bit);
     new_tokens[0] = "madd";
-    new_tokens[1] = tokens[1]; // Rd (destination)
-    new_tokens[2] = tokens[2];     // Rn (first source is zero register)
-    new_tokens[3] = tokens[3]; // Rm (second source is original Rn)
+    new_tokens[1] = tokens[1];
+    new_tokens[2] = tokens[2];
+    new_tokens[3] = tokens[3];
     new_tokens[4] = "ZR";
 
     return multiply_assembly(new_tokens, 5);
 }
 
 uint32_t mneg_assembly(char** tokens, uint32_t token_count) {
-    char* new_tokens[5]; // ORN Rd, XZR, Rn will always be 4 tokens
+    char* new_tokens[5];
+    uint32_t sf_bit = 0;
+    parse_register_token(tokens[1], &sf_bit);
     new_tokens[0] = "msub";
-    new_tokens[1] = tokens[1]; // Rd (destination)
-    new_tokens[2] = tokens[2];     // Rn (first source is zero register)
-    new_tokens[3] = tokens[3]; // Rm (second source is original Rn)
+    new_tokens[1] = tokens[1];
+    new_tokens[2] = tokens[2];
+    new_tokens[3] = tokens[3];
     new_tokens[4] = "ZR";
 
     return multiply_assembly(new_tokens, 5);
 }
-
-
-
