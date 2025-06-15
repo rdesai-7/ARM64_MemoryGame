@@ -76,11 +76,11 @@ uint32_t parse_loadstore(char **tokens, int num_toks, ARM_STATE *state) {
                     }
                 }
                 break;
-            case REG_OFFSET:
+            case REG_OFFSET:;
                 uint32_t xm = parse_register_token(tokens[3], NULL);
                 offset = REGOFFSET_ENCODING | (xm << 6);
                 break;
-            default:
+            default:;
                 // pre or post indexed
                 uint32_t simm9 = parse_imm(tokens[3]);
                 uint32_t I = (addrmode == PRE_INDEXED) ? 1 : 0;
