@@ -9,6 +9,42 @@
 
 #define MAX_TOKENS 10
 
+//add actual parse functions in here
+instruction_entry_t instruction_table[] = {
+    {"add", parse_add},
+    {"adds", parse_add},
+    {"sub", parse_add},
+    {"subs", parse_add},
+    {"cmp", parse_add},
+    {"cmn", parse_add},
+    {"neg", parse_add},
+    {"negs", parse_add},
+    {"and", parse_add},
+    {"ands", parse_add},
+    {"bic", parse_add},
+    {"bics", parse_add},
+    {"eor", parse_add},
+    {"orr", parse_add},
+    {"eon", parse_add},
+    {"orn", parse_add},
+    {"tst", parse_add},
+    {"movk", parse_add},
+    {"movn", parse_add},
+    {"movz", parse_add},
+    {"mov", parse_add},
+    {"mvn", parse_add},
+    {"madd", parse_add},
+    {"msub", parse_add},
+    {"mul", parse_add},
+    {"mneg", parse_add},
+    {"b", parse_add},
+    {"b.cond", parse_add},
+    {"br", parse_add},
+    {"str", parse_add},
+    {"ldr", parse_add},
+    {NULL, NULL},
+};
+
 bool is_directive(char *s) {
     return strncmp(s, ".int", 4) == 0;
 }
@@ -65,9 +101,21 @@ bool run_pass_two( const char *filename, ARM_STATE *state) {
                 //strcpy(line_buffer, line);
                 tokenize(line, ", ", tokens, &num_tokens);
 
-                //parse each instruction
-                //call a parse function that calls one of 4 separate parse functions depending on instruction type
+                char *current_mnemonic = (strncmp(tokens[0], "b.", 2) == 0) ? "b.cond" : tokens[0]; //Generalises b.cond mnemonic
+
+                //Select correct parse function based on mnemonic and parses instruction
+                uint32_t curr_instruction = 0;
+                for (int i = 0; instruction_table[i].mnemonic != NULL; i++) {
+                    if (strcmp(current_mnemonic, instruction_table[i].mnemonic) == 0) {
+                        curr_instruction = instruction_table[i].parser(tokens, num_tokens, state);
+                        break;
+                    }
+                }
+
+                //store current instruction in memory OR write to file?
+                state->binaryInstructions[curr_address] = curr_instruction;
             }
+
             curr_address += ADDR_INCREMENT;
         }
     }
@@ -83,7 +131,5 @@ bool run_pass_two( const char *filename, ARM_STATE *state) {
     return true;
 }
 
-
 //instructions need to be stored somewhere
 //make an assembler state type that stores the symbol table, the binary instructions (in a memory array format), and the current address
-
