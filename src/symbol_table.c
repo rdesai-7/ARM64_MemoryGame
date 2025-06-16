@@ -8,7 +8,7 @@
 
 #define INITIAL_CAP 8
 
-SymbolTable_t makeSymboleTable( void ) {
+SymbolTable_t makeSymbolTable( void ) {
     SymbolTable_t new = malloc(sizeof(struct SymbolTable_t));
     assert(new != NULL);
 

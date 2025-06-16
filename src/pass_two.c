@@ -1,9 +1,49 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
+#include <assert.h>
 #include "symbol_table.h"
 #include "pass_one.h"
 #include "pass_two.h"
+
+#define MAX_TOKENS 10
+
+//add actual parse functions in here
+instruction_entry_t instruction_table[] = {
+    {"add", parse_add},
+    {"adds", parse_add},
+    {"sub", parse_add},
+    {"subs", parse_add},
+    {"cmp", parse_add},
+    {"cmn", parse_add},
+    {"neg", parse_add},
+    {"negs", parse_add},
+    {"and", parse_add},
+    {"ands", parse_add},
+    {"bic", parse_add},
+    {"bics", parse_add},
+    {"eor", parse_add},
+    {"orr", parse_add},
+    {"eon", parse_add},
+    {"orn", parse_add},
+    {"tst", parse_add},
+    {"movk", parse_add},
+    {"movn", parse_add},
+    {"movz", parse_add},
+    {"mov", parse_add},
+    {"mvn", parse_add},
+    {"madd", parse_add},
+    {"msub", parse_add},
+    {"mul", parse_add},
+    {"mneg", parse_add},
+    {"b", parse_add},
+    {"b.cond", parse_add},
+    {"br", parse_add},
+    {"str", parse_add},
+    {"ldr", parse_add},
+    {NULL, NULL},
+};
 
 bool is_directive(char *s) {
     return strncmp(s, ".int", 4) == 0;
@@ -17,38 +57,71 @@ uint32_t parse_directive(char *line) {
     return (uint32_t) value;
 }
 
+void tokenize(char *str, char *delim, char *tokens[], int *num_tokens) {
+    char *token;
+    char *save_ptr = NULL;
+    int curr_token_count = 0;
 
-void run_pass_two( const char *filename, SymbolTable_t st) {
+    token = strtok_r(str, delim, &save_ptr);
+    while (token != NULL) {
+        tokens[curr_token_count] = token;
+        curr_token_count++;
+        token = strtok_r(NULL, delim, &save_ptr);
+    }
+    *num_tokens = curr_token_count;
+}
+
+bool run_pass_two( const char *filename, ARM_STATE *state) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
         fprintf(stderr, "Error Opening File");
-        exit(1);
+        return false;
     }
 
     char line_buffer[LINE_BUFFER];
-    uint32_t curr_address = 0x0;
 
     while( fgets(line_buffer, sizeof(line_buffer), file) != NULL ) {
         char *line = trim_whitespace(line_buffer);
         char label_name[MAX_LABEL_LENGTH];
 
-        if( !is_line_empty(line) && !is_label(line,label_name)) {
+        if( !is_line_empty(line) && !is_label(line, label_name)) {
 
             //deal with .int directives
             if (is_directive(line)) {
                 uint32_t N = parse_directive(line);
-                // idk what to do here...
-                // store N at the curr_address i think. how do you write that in binary though?
+                state->binaryInstructions[state->currAddress] = N;
+            } else {
+                //all other instructions
+                
+                //Tokenise the line
+                char *tokens[MAX_TOKENS];
+                int num_tokens = 0;
+                //char line_buffer[256];
+                //strcpy(line_buffer, line);
+                tokenize(line, ", ", tokens, &num_tokens);
+
+                char *current_mnemonic = (strncmp(tokens[0], "b.", 2) == 0) ? "b.cond" : tokens[0]; //Generalises b.cond mnemonic
+
+                //Select correct parse function based on mnemonic and parses instruction
+                uint32_t curr_instruction;
+                bool instr_assigned = false;
+                for (int i = 0; instruction_table[i].mnemonic != NULL; i++) {
+                    if (strcmp(current_mnemonic, instruction_table[i].mnemonic) == 0) {
+                        curr_instruction = instruction_table[i].parser(tokens, num_tokens, state);
+                        instr_assigned = true;
+                        break;
+                    }
+                }
+                if (!instr_assigned) {
+                    fprintf(stderr, "Mnemonic doesn't match anything in the table");
+                    return false;
+                } else {
+                     //store current instruction in memory OR write to file?
+                    state->binaryInstructions[state->currAddress] = curr_instruction;
+                } 
             }
 
-            //split into tokens
-
-            //parse each instruction
-
-            //call a parse function that calls one of 4 separate parse functions depending on instruction type
-
-
-            curr_address += ADDR_INCREMENT;
+            state->currAddress += ADDR_INCREMENT;
         }
     }
 
@@ -56,13 +129,12 @@ void run_pass_two( const char *filename, SymbolTable_t st) {
     if (ferror(file)) {
         fprintf(stderr, "Error reading from file");
         fclose(file);
-        exit(1);
+        return false;
     }
 
     fclose(file);
+    return true;
 }
-
 
 //instructions need to be stored somewhere
 //make an assembler state type that stores the symbol table, the binary instructions (in a memory array format), and the current address
-

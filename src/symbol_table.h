@@ -17,12 +17,12 @@ typedef struct {
 struct SymbolTable_t {
     SymbolEntry_t *entries; 
     int no_entries;
-    int cap
+    int cap;
 };
 
 typedef struct SymbolTable_t *SymbolTable_t;
 
-extern SymbolTable_t makeSymboleTable( void );
+extern SymbolTable_t makeSymbolTable( void );
 extern void addSymbolEntry( SymbolTable_t st, const char *name , uint32_t address );
 extern void getSymbolEntry( SymbolTable_t st, const char *name, uint32_t *address_out );
 extern void destroySymbolEntry( SymbolTable_t st );
