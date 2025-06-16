@@ -44,7 +44,7 @@ uint32_t parse_loadstore(char **tokens, int num_toks, ARM_STATE *state) {
         }
 
         // ** DIV BY 4 MIGHT BE A MISTAKE **
-        uint32_t simm19 = (address - state->curr_address) / ADDR_INCREMENT;
+        uint32_t simm19 = (address - state->currAddress) / ADDR_INCREMENT;
         
         encoding = LOADLIT_ENCODING | rt | (simm19 << 5) | (sf << 30);
     } else {

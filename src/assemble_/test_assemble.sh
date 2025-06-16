@@ -12,7 +12,7 @@ make
 rm ../../armv8_testsuite/solution/assemble
 mv assemble ../../armv8_testsuite/solution/
 cd ../../armv8_testsuite
-echo "Running assembler tests"
 source ./.venv/bin/activate
 make clean
+echo "Running assembler tests"
 ./run -A -pf

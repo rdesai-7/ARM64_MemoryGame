@@ -82,7 +82,7 @@ bool run_pass_two( const char *filename, ARM_STATE *state) {
             //deal with .int directives
             if (is_directive(line)) {
                 uint32_t N = parse_directive(line);
-                state->binaryInstructions[state->currAddress] = N;
+                state->binaryInstructions[state->currAddress / ADDR_INCREMENT] = N;
             } else {
                 //all other instructions
                 
@@ -92,6 +92,11 @@ bool run_pass_two( const char *filename, ARM_STATE *state) {
                 //char line_buffer[256];
                 //strcpy(line_buffer, line);
                 tokenize(line, ", ", tokens, &num_tokens);
+
+                for (int i = 0; i < num_tokens; i++) {
+                    printf("Token %d: \"%s\" ", i + 1, tokens[i]);
+                }
+                printf("\n");
 
                 char *current_mnemonic = (strncmp(tokens[0], "b.", 2) == 0) ? "b.cond" : tokens[0]; //Generalises b.cond mnemonic
 
@@ -110,7 +115,7 @@ bool run_pass_two( const char *filename, ARM_STATE *state) {
                     return false;
                 } else {
                      //store current instruction in memory OR write to file?
-                    state->binaryInstructions[state->currAddress] = curr_instruction;
+                    state->binaryInstructions[state->currAddress / ADDR_INCREMENT] = curr_instruction;
                 } 
             }
 

@@ -266,7 +266,7 @@ uint32_t add_sub_immediate_assembly(char** tokens, int token_count, ARM_STATE *s
 }
 
 uint32_t assemble_add_sub_instruction(char** tokens, int token_count, ARM_STATE *state) {
-    assert(token_count < 4);
+    assert(token_count >= 4);
 
     if (tokens[3][0] == '#') {
         return add_sub_immediate_assembly(tokens, token_count, state);

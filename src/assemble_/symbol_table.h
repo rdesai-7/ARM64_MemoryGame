@@ -29,5 +29,6 @@ extern SymbolTable_t makeSymbolTable( void );
 extern void addSymbolEntry( SymbolTable_t st, const char *name , uint32_t address );
 extern void getSymbolEntry( SymbolTable_t st, const char *name, uint32_t *address_out );
 extern void destroySymbolTable( SymbolTable_t st );
+extern void printSymbolTable ( SymbolTable_t st);
 
 #endif

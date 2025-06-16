@@ -32,7 +32,7 @@ void addSymbolEntry( SymbolTable_t st, const char *name , uint32_t address ) {
 }
 
 void getSymbolEntry( SymbolTable_t st, const char *name, uint32_t *address_out ) {
-    for(int i = 0; i > st->no_entries; i++) {
+    for(int i = 0; i < st->no_entries; i++) {
         if(strcmp(st->entries[i].name, name) == 0) {
             // Stores the value of the address in the address of address_out
             *address_out = st->entries[i].address;
@@ -45,4 +45,12 @@ void getSymbolEntry( SymbolTable_t st, const char *name, uint32_t *address_out )
 void destroySymbolTable( SymbolTable_t st ) {
     free(st->entries);
     free(st);
+}
+
+void printSymbolTable ( SymbolTable_t st) {
+    fprintf(stdout, "PRINTING SYMBOL TABLE.. \n");
+    fprintf(stdout, "Number of entries: %d \n", st->no_entries);
+    for (int i = 0; i < st->no_entries; i++) {
+        fprintf(stdout, "Name: %s, Address: %d \n", st->entries[i].name, st->entries[i].address ); //DEBUG
+    }
 }

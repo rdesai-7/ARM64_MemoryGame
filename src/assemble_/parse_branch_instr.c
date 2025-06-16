@@ -37,6 +37,7 @@ uint32_t parse_b_conditional( char **tokens, int num_tokens, ARM_STATE *state ) 
 }
 
 uint32_t parse_b_unconditional( char **tokens, int num_tokens, ARM_STATE *state ) {
+    fprintf(stdout, "Running parse b unconditional \n"); //DEBUG
     char label_name[MAX_LABEL_LENGTH];
 
     strcpy( label_name, tokens[1] );
@@ -63,8 +64,9 @@ uint32_t parse_br_register( char **tokens, int num_tokens, ARM_STATE *state ) {
 
     uint32_t instr = 0;
 
-    instr = (uint32_t)(CONST_REG << 10)     | //Shift the preset bits
-            (uint32_t)(reg_num & 0x1F << 5);
+    printf("Reg num %d \n", reg_num);
+
+    instr = (uint32_t)(CONST_REG << 10) | (uint32_t)((reg_num & 0x1F) << 5); //Shift the preset bits
 
     return instr;
 
