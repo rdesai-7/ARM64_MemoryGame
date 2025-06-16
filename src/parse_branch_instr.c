@@ -45,11 +45,9 @@ uint32_t parse_b_conditional( char **tokens, int num_tokens, ARM_STATE *state ) 
 
     uint32_t instr = 0;
 
-    instr |= (uint32_t)(0x54U << 24); //put the constant part of the conditional instr
-
-    instr |= (uint32_t)((simm19 & 0x7FFFF) << 5); //Add offset value and mask with 0x7FFFF to unsure only 19 bits are used
-
-    instr |= (cond_code & 0xF) << 0; //Add condition code and mask with oxF
+    instr = (uint32_t)(0x54U << 24)             | //put the constant part of the conditional instr
+            (uint32_t)((simm19 & 0x7FFFF) << 5) | //Add offset value and mask with 0x7FFFF to unsure only 19 bits are used
+            (cond_code & 0xF) << 0; //Add condition code and mask with oxF
 
     return instr;
 }
@@ -63,28 +61,26 @@ uint32_t parse_b_unconditional( char **tokens, int num_tokens, ARM_STATE *state 
 
     getSymbolEntry( state->symbolTable, label_name, &label_address );
 
-    int32_t offset = (uint32_t)label_address - (uint32_t)state->currAddress;
+    int32_t offset = (int32_t)label_address - (int32_t)state->currAddress;
 
     int32_t simm26 = offset / 4;
 
     uint32_t instr = 0;
 
-    instr |= (uint32_t)(0x5U << 26);
-
-    instr |= (uint32_t)((simm26 & 0x3FFFFFF) << 0); //Mask with 0x3FFFFF so only 26 bits are used
+    instr = (uint32_t)(0x5U << 26)              |
+            (uint32_t)((simm26 & 0x3FFFFFF) << 0); //Mask with 0x3FFFFF so only 26 bits are used
 
     return instr;
 }
 
 uint32_t parse_br_register( char **tokens, int num_tokens, ARM_STATE *state ) {
     uint32_t sf = 0;
-    uint32_t reg_num = parse_register_token(*tokens[1], &sf);
+    uint32_t reg_num = parse_register_token(tokens[1], &sf);
 
     uint32_t instr = 0;
 
-    instr |= (uint32_t)(0x3587C0U << 10); //Shift the preset bits
-
-    instr |= (uint32_t)(reg_num & 0x1F << 5);
+    instr = (uint32_t)(0x3587C0U << 10)     | //Shift the preset bits
+            (uint32_t)(reg_num & 0x1F << 5);
 
     return instr;
 
