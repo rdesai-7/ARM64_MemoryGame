@@ -4,17 +4,13 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "assembler_state.h"
-#include "parse_loadstore.h"
-
-#define ZERO_REGISTER 31
-#define STACK_POINTER 31
+#include "parse_helpers.h"
 
 #define MUL_INITIAL_STATE (((uint32_t)0xD8) << 21)
 #define BIT_LOGIC_INITIAL_STATE (((uint32_t)0xA) << 24) 
 #define ADD_SUB_REGISTER_INITIAL_STATE (((uint32_t)0xB) << 24)
 #define ADD_SUB_IMMEDIATE_INITIAL_STATE (((uint32_t)0x22) << 23)
 #define MOV_INITIAL_STATE (((uint32_t)0x25) << 23)
-
 
 typedef struct {
     const char* mnemonic;
@@ -40,10 +36,6 @@ typedef struct {
 
 extern const MovWOpcData mov_w_opcode_table[];
 extern const size_t NUM_MOV_W_ENTRIES;
-
-extern uint32_t parse_imm(char* token);
-extern uint32_t parse_shift_type(const char* shift_type_str);
-extern uint32_t parse_register_token(char* reg_token, uint32_t* sf_bit);
 
 extern uint32_t multiply_assembly(char** tokens, int token_count, ARM_STATE *state);
 extern uint32_t bit_logic_assembly(char** tokens, int token_count, ARM_STATE *state);

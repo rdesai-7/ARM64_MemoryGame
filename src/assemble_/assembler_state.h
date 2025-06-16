@@ -12,4 +12,12 @@ typedef struct {
     SymbolTable_t symbolTable;
 } ARM_STATE;
 
+// Common definitions
+#define ADDR_INCREMENT 4
+#define LINE_BUFFER 256
+#define MAX_LABEL_LENGTH 128 
+#define MAX_TOKENS 10
+#define ZERO_REGISTER 31
+#define STACK_POINTER 31 //is this ever used?
+
 #endif

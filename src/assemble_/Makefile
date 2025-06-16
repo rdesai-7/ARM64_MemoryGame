@@ -8,7 +8,7 @@ CFLAGS  ?= -std=c17 -g \
 TARGET = assemble
 
 # Object files for the target
-OBJS = assemble.o pass_one.o pass_two.o parse_branch_instr.o parse_DP.o parse_loadstore.o symbol_table.o
+OBJS = assemble.o pass_one.o pass_two.o parse_branch.o parse_DP.o parse_loadstore.o parse_helpers.o symbol_table.o
 
 .SUFFIXES: .c .o
 

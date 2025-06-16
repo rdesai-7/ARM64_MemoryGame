@@ -1,8 +1,5 @@
 #include "pass_two.h"
 
-#define MAX_TOKENS 10
-
-//add actual parse functions in here
 instruction_entry_t instruction_table[] = {
     {"add", assemble_add_sub_instruction},
     {"adds", assemble_add_sub_instruction},

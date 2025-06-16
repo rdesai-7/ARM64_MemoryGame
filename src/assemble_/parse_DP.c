@@ -35,55 +35,6 @@ const MovWOpcData mov_w_opcode_table[] = {
 };
 const size_t NUM_MOV_W_ENTRIES = sizeof(mov_w_opcode_table) / sizeof(MovWOpcData);
 
-extern uint32_t parse_shift_type(const char* shift_type_str) {
-    if (strcmp(shift_type_str, "lsl") == 0) {
-            return 0x0;
-        } else if (strcmp(shift_type_str, "lsr") == 0) {
-            return 0x1;
-        } else if (strcmp(shift_type_str, "asr") == 0) {
-            return 0x2;
-        } else if (strcmp(shift_type_str, "ror") == 0) {
-            return 0x3;
-        } else {
-            fprintf(stderr, "Error: Invalid shift type '%s'\n", shift_type_str);
-            return 0;
-        }
-
-}
-
-uint32_t parse_register_token(char* reg_token, uint32_t* sf_bit) {
-    
-    if (strcmp(reg_token, "sp") == 0 || strcmp(reg_token, "xzr") == 0) {
-        if (sf_bit != NULL) {
-            *sf_bit = 1; 
-        }
-        return ZERO_REGISTER; 
-    }
-
-    if (strcmp(reg_token, "wsp") == 0 || strcmp(reg_token, "wzr") == 0) {
-        if (sf_bit != NULL) {
-            *sf_bit = 0; 
-        }
-        return ZERO_REGISTER; 
-    }
-
-    if (strcmp(reg_token, "ZR") == 0) {
-        return ZERO_REGISTER; 
-    }
-
-    char reg_type = reg_token[0];
-    uint32_t reg_num = strtoul(reg_token + 1, NULL, 10); 
-
-    if (sf_bit != NULL) {
-        if (reg_type == 'W' || reg_type == 'w') {
-            *sf_bit = 0; // 32-bit register
-        } else {
-            *sf_bit = 1; // 64-bit register
-        }
-    }
-    return reg_num;
-}
-
 
 //CHANGE THIS TO SAME LOGIC AS OTTHER FUNCTIONS
 uint32_t get_logic_opcode(const char* mnemonic, uint32_t *N) {
@@ -118,7 +69,6 @@ int get_mov_opcode(const char* mnemonic, uint32_t* opc_out) {
 
 uint32_t multiply_assembly(char** tokens, int token_count, ARM_STATE *state) {
     uint32_t rd_reg_num, rn_reg_num, rm_reg_num, ra_reg_num;
-    uint32_t instruction = MUL_INITIAL_STATE;
     uint32_t sf_bit = 0;
 
     rd_reg_num = parse_register_token(tokens[1], &sf_bit);
@@ -126,21 +76,12 @@ uint32_t multiply_assembly(char** tokens, int token_count, ARM_STATE *state) {
     rm_reg_num = parse_register_token(tokens[3], &sf_bit);
     ra_reg_num = parse_register_token(tokens[4], &sf_bit);
 
-    //ADD ALL IN ONE LINE
-
-    instruction |= (sf_bit & 0x1) << 31;
-
-    instruction |= (rm_reg_num & 0x1F) << 16;
+    uint32_t instruction = MUL_INITIAL_STATE | (sf_bit & 0x1) << 31 | (rm_reg_num & 0x1F) << 16 
+     | (ra_reg_num & 0x1F) << 10 | (rn_reg_num & 0x1F) << 5| (rd_reg_num & 0x1F);
 
     if (strcmp(tokens[0], "msub") == 0) {
         instruction |= (1 << 15);
     }
-
-    instruction |= (ra_reg_num & 0x1F) << 10;
-
-    instruction |= (rn_reg_num & 0x1F) << 5;
-
-    instruction |= (rd_reg_num & 0x1F);
 
     return instruction;
 }
@@ -151,7 +92,6 @@ uint32_t bit_logic_assembly(char** tokens, int token_count, ARM_STATE *state) {
     uint32_t N_bit;
     uint32_t shift_type_bits = 0x0;
     uint32_t imm6_val = 0;
-    uint32_t instruction = BIT_LOGIC_INITIAL_STATE;
     uint32_t sf_bit = 0;
 
     opcode = get_logic_opcode(tokens[0], &N_bit);
@@ -167,23 +107,9 @@ uint32_t bit_logic_assembly(char** tokens, int token_count, ARM_STATE *state) {
         shift_type_bits = parse_shift_type(shift_type_str);
     }
 
-    //PUT IT ALL IN ONE LINE
-
-    instruction |= (sf_bit & 0x1) << 31;
-
-    instruction |= (opcode & 0x3) << 29;
-
-    instruction |= (shift_type_bits & 0x3) << 22;
-
-    instruction |= (N_bit & 0x1) << 21;
-
-    instruction |= (rm_reg_num & 0x1F) << 16;
-
-    instruction |= (imm6_val & 0x3F) << 10;
-
-    instruction |= (rn_reg_num & 0x1F) << 5;
-
-    instruction |= (rd_reg_num & 0x1F);
+    uint32_t instruction = BIT_LOGIC_INITIAL_STATE | (sf_bit & 0x1) << 31 | (opcode & 0x3) << 29 
+     | (shift_type_bits & 0x3) << 22 | (N_bit & 0x1) << 21 | (rm_reg_num & 0x1F) << 16 
+     | (imm6_val & 0x3F) << 10 | (rn_reg_num & 0x1F) << 5 | (rd_reg_num & 0x1F);
 
     return instruction;
 }
@@ -193,7 +119,6 @@ uint32_t add_sub_assembly(char** tokens, int token_count, ARM_STATE *state) {
     uint32_t opcode;
     uint32_t imm6_val = 0;
     uint32_t shift_type_bits = 0x0;
-    uint32_t instruction = ADD_SUB_REGISTER_INITIAL_STATE;
     uint32_t sf_bit = 0;
 
     get_add_sub_opcode(tokens[0], &opcode);
@@ -209,21 +134,14 @@ uint32_t add_sub_assembly(char** tokens, int token_count, ARM_STATE *state) {
         shift_type_bits = parse_shift_type(shift_type_str);
     }
 
-    // ADD ALL INTO ONE LINE 
-
-    instruction |= (sf_bit & 0x1) << 31;
-
-    instruction |= (opcode & 0x3) << 29;
-
-    instruction |= (shift_type_bits & 0x3) << 22;
-
-    instruction |= (rm_reg_num & 0x1F) << 16;
-
-    instruction |= (imm6_val & 0x3F) << 10;
-
-    instruction |= (rn_reg_num & 0x1F) << 5;
-
-    instruction |= (rd_reg_num & 0x1F);
+    uint32_t instruction = ADD_SUB_REGISTER_INITIAL_STATE |
+                       ((sf_bit & 0x1) << 31)             |
+                       ((opcode & 0x3) << 29)             |
+                       ((shift_type_bits & 0x3) << 22)    |
+                       ((rm_reg_num & 0x1F) << 16)        |
+                       ((imm6_val & 0x3F) << 10)          |
+                       ((rn_reg_num & 0x1F) << 5)         |
+                       (rd_reg_num & 0x1F);
 
     return instruction;
 }
@@ -233,7 +151,7 @@ uint32_t add_sub_immediate_assembly(char** tokens, int token_count, ARM_STATE *s
     uint32_t opcode;
     uint32_t imm12_val;
     uint32_t sh_bit = 0;
-    uint32_t instruction = ADD_SUB_IMMEDIATE_INITIAL_STATE;
+    
     uint32_t sf_bit = 0;
 
     get_add_sub_opcode(tokens[0], &opcode);
@@ -248,19 +166,13 @@ uint32_t add_sub_immediate_assembly(char** tokens, int token_count, ARM_STATE *s
         } 
     }
 
-    //ALL INTO ONE LINE
-
-    instruction |= (sf_bit & 0x1) << 31;
-
-    instruction |= (opcode & 0x3) << 29;
-
-    instruction |= (sh_bit & 0x1) << 22;
-
-    instruction |= (imm12_val & 0xFFF) << 10;
-
-    instruction |= (rn_reg_num & 0x1F) << 5;
-
-    instruction |= (rd_reg_num & 0x1F) << 0;
+    uint32_t instruction = ADD_SUB_IMMEDIATE_INITIAL_STATE
+                     | ((sf_bit & 0x1) << 31)
+                     | ((opcode & 0x3) << 29)
+                     | ((sh_bit & 0x1) << 22)
+                     | ((imm12_val & 0xFFF) << 10)
+                     | ((rn_reg_num & 0x1F) << 5)
+                     | ((rd_reg_num & 0x1F) << 0);
 
     return instruction;
 }
@@ -279,7 +191,6 @@ uint32_t mov_wide_assembly(char** tokens, int token_count, ARM_STATE *state) {
     uint32_t rd_reg_num;
     uint32_t opc_val;
     uint32_t imm16_val;
-    uint32_t instruction = MOV_INITIAL_STATE;
     uint32_t sf_bit = 0;
 
     get_mov_opcode(tokens[0], &opc_val);
@@ -292,17 +203,12 @@ uint32_t mov_wide_assembly(char** tokens, int token_count, ARM_STATE *state) {
         shift_amount = parse_imm(tokens[4]) / 16;
     }
 
-    // MOVE ALL INTO ONE LINE
-
-    instruction |= (sf_bit & 0x1) << 31;
-
-    instruction |= (opc_val & 0x3) << 29;
-
-    instruction |= (shift_amount & 0x3) << 21;
-
-    instruction |= (imm16_val & 0xFFFF) << 5;
-
-    instruction |= (rd_reg_num & 0x1F) << 0;
+    uint32_t instruction = MOV_INITIAL_STATE
+                     | ((sf_bit & 0x1) << 31)
+                     | ((opc_val & 0x3) << 29)
+                     | ((shift_amount & 0x3) << 21)
+                     | ((imm16_val & 0xFFFF) << 5)
+                     | ((rd_reg_num & 0x1F) << 0);
 
     return instruction;
 }

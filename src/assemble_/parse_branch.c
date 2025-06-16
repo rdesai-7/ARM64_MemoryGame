@@ -1,4 +1,4 @@
-#include "parse_branch_instr.h"
+#include "parse_branch.h"
 
 static uint32_t map_cond_code( char *cond ) {
     if (strcmp(cond, "b.eq") == 0) { return COND_EQ; }
@@ -8,7 +8,7 @@ static uint32_t map_cond_code( char *cond ) {
     if (strcmp(cond, "b.gt") == 0) { return COND_GT; }
     if (strcmp(cond, "b.le") == 0) { return COND_LE; }
     if (strcmp(cond, "b.al") == 0) { return COND_AL; }
-    fprintf(stderr, "Error: Unknown conditional branch mnemonic");
+    fprintf(stderr, "Error: Unknown conditional branch mnemonic \n");
     return 0;
 }
 
@@ -25,7 +25,7 @@ uint32_t parse_b_conditional( char **tokens, int num_tokens, ARM_STATE *state ) 
 
     int32_t offset = (int32_t)label_address - (int32_t)state->currAddress;
 
-    int32_t simm19 = offset / 4;
+    int32_t simm19 = offset / ADDR_INCREMENT;
 
     uint32_t instr = 0;
 
@@ -48,7 +48,7 @@ uint32_t parse_b_unconditional( char **tokens, int num_tokens, ARM_STATE *state 
 
     int32_t offset = (int32_t)label_address - (int32_t)state->currAddress;
 
-    int32_t simm26 = offset / 4;
+    int32_t simm26 = offset / ADDR_INCREMENT;
 
     uint32_t instr = 0;
 

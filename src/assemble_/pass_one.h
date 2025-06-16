@@ -9,11 +9,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include "symbol_table.h"
-#include "pass_two.h"
-
-#define LINE_BUFFER 256
-#define ADDR_INCREMENT 4
-#define MAX_LABEL_LENGTH 128 //potentially edit size
+#include "assembler_state.h"
 
 extern char* trim_whitespace(char *s);
 extern bool is_line_empty(const char *line);

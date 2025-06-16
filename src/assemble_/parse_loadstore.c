@@ -1,17 +1,5 @@
 #include "parse_loadstore.h"
 
-uint32_t parse_imm(char *token) {
-    // PRE: token is of the form "#imm"
-    // trailing chars ignored
-    long val = strtol(token + 1, NULL, 0);
-    return (uint32_t) val;
-}
-
-uint32_t parse_simm(char *token, int num_bits) {
-    // PRE: token is of the form "#simm"
-    long val = strtol(token + 1, NULL, 0);
-    return (uint32_t) val & ((1U << num_bits) - 1);
-}
 
 addrmode_t set_addrmode(char **tokens, int num_toks) {
     if (num_toks == 3) {

@@ -9,7 +9,7 @@
 #include "symbol_table.h"
 #include "pass_one.h"
 #include "assembler_state.h"
-#include "parse_branch_instr.h"
+#include "parse_branch.h"
 #include "parse_loadstore.h"
 #include "parse_DP.h"
 
