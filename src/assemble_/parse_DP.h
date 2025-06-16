@@ -61,7 +61,7 @@ extern uint32_t mul_assembly(char** tokens, int token_count, ARM_STATE *state);
 extern uint32_t mneg_assembly(char** tokens, int token_count, ARM_STATE *state);
 
 extern uint32_t get_logic_opcode(const char* mnemonic, uint32_t *N);
-extern int get_add_sub_opcode(const char* mnemonic, uint32_t* op_out, uint32_t* S_out);
+extern int get_add_sub_opcode(const char* mnemonic, uint32_t* opc_out);
 extern int get_mov_opcode(const char* mnemonic, uint32_t* opc_out);
 
 #endif
