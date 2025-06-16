@@ -7,14 +7,9 @@
 #include <ctype.h>
 #include "symbol_table.h"
 #include "pass_one.h"
+#include "parse_branch_instr.h"
 
-#define COND_EQ 0x0
-#define COND_NE 0x1
-#define COND_GE 0xA
-#define COND_LT 0xB
-#define COND_GT 0xC
-#define COND_LE 0xD
-#define COND_AL 0xE
+
 
 static uint32_t map_cond_code( char *cond ) {
     if (strcmp(cond, "b.eq") == 0) { return COND_EQ; }
@@ -45,7 +40,7 @@ uint32_t parse_b_conditional( char **tokens, int num_tokens, ARM_STATE *state ) 
 
     uint32_t instr = 0;
 
-    instr = (uint32_t)(0x54U << 24)             | //put the constant part of the conditional instr
+    instr = ((uint32_t) (CONST_COND) << 24) | //put the constant part of the conditional instr
             (uint32_t)((simm19 & 0x7FFFF) << 5) | //Add offset value and mask with 0x7FFFF to unsure only 19 bits are used
             (cond_code & 0xF) << 0; //Add condition code and mask with oxF
 
@@ -67,7 +62,7 @@ uint32_t parse_b_unconditional( char **tokens, int num_tokens, ARM_STATE *state 
 
     uint32_t instr = 0;
 
-    instr = (uint32_t)(0x5U << 26)              |
+    instr = (uint32_t)(CONST_UNCOND << 26)              |
             (uint32_t)((simm26 & 0x3FFFFFF) << 0); //Mask with 0x3FFFFF so only 26 bits are used
 
     return instr;
@@ -79,7 +74,7 @@ uint32_t parse_br_register( char **tokens, int num_tokens, ARM_STATE *state ) {
 
     uint32_t instr = 0;
 
-    instr = (uint32_t)(0x3587C0U << 10)     | //Shift the preset bits
+    instr = (uint32_t)(CONST_REG << 10)     | //Shift the preset bits
             (uint32_t)(reg_num & 0x1F << 5);
 
     return instr;
