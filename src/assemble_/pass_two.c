@@ -1,10 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <assert.h>
-#include "symbol_table.h"
-#include "pass_one.h"
 #include "pass_two.h"
 
 #define MAX_TOKENS 10

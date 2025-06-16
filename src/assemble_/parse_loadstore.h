@@ -8,8 +8,15 @@
 #include "symbol_table.h"
 #include "pass_one.h"
 #include "pass_two.h"
-#include "emulate_/emulator_state.h"
-#include "parse_dp.h"
+#include "parse_DP.h"
+
+// Addressing Modes
+typedef enum {
+    U_OFFSET,
+    PRE_INDEXED,
+    POST_INDEXED,
+    REG_OFFSET
+} addrmode_t;
 
 extern uint32_t parse_imm(char *token);
 extern addrmode_t set_addrmode(char **tokens, int num_toks);

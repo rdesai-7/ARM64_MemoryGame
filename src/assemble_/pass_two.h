@@ -1,7 +1,17 @@
 #ifndef PASS_TWO_H
 #define PASS_TWO_H
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <assert.h>
+#include "symbol_table.h"
+#include "pass_one.h"
 #include "assembler_state.h"
+#include "parse_branch_instr.h"
+#include "parse_loadstore.h"
+#include "parse_DP.h"
 
 extern bool is_directive(char *s);
 extern uint32_t parse_directive(char *line);

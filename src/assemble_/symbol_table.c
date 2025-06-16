@@ -1,9 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdbool.h>
-#include <assert.h>
 #include "symbol_table.h"
 
 #define INITIAL_CAP 8
@@ -48,7 +42,7 @@ void getSymbolEntry( SymbolTable_t st, const char *name, uint32_t *address_out )
     fprintf(stderr, "Name not found in lookup table");
 }
 
-void destroySymbolEntry( SymbolTable_t st ) {
+void destroySymbolTable( SymbolTable_t st ) {
     free(st->entries);
     free(st);
 }

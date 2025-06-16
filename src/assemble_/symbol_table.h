@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
 
 #define MAX_LABEL_LENGTH 128
 
@@ -25,6 +28,6 @@ typedef struct SymbolTable_t *SymbolTable_t;
 extern SymbolTable_t makeSymbolTable( void );
 extern void addSymbolEntry( SymbolTable_t st, const char *name , uint32_t address );
 extern void getSymbolEntry( SymbolTable_t st, const char *name, uint32_t *address_out );
-extern void destroySymbolEntry( SymbolTable_t st );
+extern void destroySymbolTable( SymbolTable_t st );
 
 #endif

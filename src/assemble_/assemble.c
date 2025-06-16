@@ -58,5 +58,7 @@ int main(int argc, char **argv) {
   
   write_binary(output_filename, &state);
 
+  destroySymbolTable(symbol_table);
+
   return EXIT_SUCCESS;
 }

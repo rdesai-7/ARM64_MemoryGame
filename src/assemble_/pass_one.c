@@ -1,13 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdbool.h>
-#include <assert.h>
-#include <ctype.h>
-#include "symbol_table.h"
 #include "pass_one.h"
-#include "pass_two.h"
 
 char* trim_whitespace(char *s) {
 

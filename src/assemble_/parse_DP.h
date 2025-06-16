@@ -43,21 +43,22 @@ extern const size_t NUM_MOV_W_ENTRIES;
 
 extern uint32_t parse_imm(char* token);
 extern uint32_t parse_shift_type(const char* shift_type_str);
+extern uint32_t parse_register_token(char* reg_token, uint32_t* sf_bit);
 
-extern uint32_t multiply_assembly(char** tokens, uint32_t token_count, ARM_STATE *state);
-extern uint32_t bit_logic_assembly(char** tokens, uint32_t token_count, ARM_STATE *state);
-extern uint32_t assemble_add_sub_instruction(char** tokens, uint32_t token_count, ARM_STATE *state);
-extern uint32_t mov_wide_assembly(char** tokens, uint32_t token_count, ARM_STATE *state);
+extern uint32_t multiply_assembly(char** tokens, int token_count, ARM_STATE *state);
+extern uint32_t bit_logic_assembly(char** tokens, int token_count, ARM_STATE *state);
+extern uint32_t assemble_add_sub_instruction(char** tokens, int token_count, ARM_STATE *state);
+extern uint32_t mov_wide_assembly(char** tokens, int token_count, ARM_STATE *state);
 
-extern uint32_t cmp_assembly(char** tokens, uint32_t token_count, ARM_STATE *state);
-extern uint32_t cmn_assembly(char** tokens, uint32_t token_count, ARM_STATE *state);
-extern uint32_t neg_assembly(char** tokens, uint32_t token_count, ARM_STATE *state);
-extern uint32_t negs_assembly(char** tokens, uint32_t token_count, ARM_STATE *state);
-extern uint32_t tst_assembly(char** tokens, uint32_t token_count, ARM_STATE *state);
-extern uint32_t mvn_assembly(char** tokens, uint32_t token_count, ARM_STATE *state);
-extern uint32_t mov_assembly(char** tokens, uint32_t token_count, ARM_STATE *state);
-extern uint32_t mul_assembly(char** tokens, uint32_t token_count, ARM_STATE *state);
-extern uint32_t mneg_assembly(char** tokens, uint32_t token_count, ARM_STATE *state);
+extern uint32_t cmp_assembly(char** tokens, int token_count, ARM_STATE *state);
+extern uint32_t cmn_assembly(char** tokens, int token_count, ARM_STATE *state);
+extern uint32_t neg_assembly(char** tokens, int token_count, ARM_STATE *state);
+extern uint32_t negs_assembly(char** tokens, int token_count, ARM_STATE *state);
+extern uint32_t tst_assembly(char** tokens, int token_count, ARM_STATE *state);
+extern uint32_t mvn_assembly(char** tokens, int token_count, ARM_STATE *state);
+extern uint32_t mov_assembly(char** tokens, int token_count, ARM_STATE *state);
+extern uint32_t mul_assembly(char** tokens, int token_count, ARM_STATE *state);
+extern uint32_t mneg_assembly(char** tokens, int token_count, ARM_STATE *state);
 
 extern uint32_t get_logic_opcode(const char* mnemonic, uint32_t *N);
 extern int get_add_sub_opcode(const char* mnemonic, uint32_t* op_out, uint32_t* S_out);

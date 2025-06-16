@@ -4,6 +4,15 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include <assert.h>
+#include <ctype.h>
+#include "symbol_table.h"
+#include "pass_one.h"
+#include "assembler_state.h"
+#include "parse_loadstore.h"
+#include "parse_DP.h"
 
 #define COND_EQ 0x0
 #define COND_NE 0x1
