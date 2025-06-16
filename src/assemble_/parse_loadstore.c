@@ -7,6 +7,12 @@ uint32_t parse_imm(char *token) {
     return (uint32_t) val;
 }
 
+uint32_t parse_simm(char *token, int num_bits) {
+    // PRE: token is of the form "#simm"
+    long val = strtol(token + 1, NULL, 0);
+    return (uint32_t) val & ((1U << num_bits) - 1);
+}
+
 addrmode_t set_addrmode(char **tokens, int num_toks) {
     if (num_toks == 3) {
         // zero unsigned offset
@@ -29,7 +35,7 @@ uint32_t parse_loadstore(char **tokens, int num_toks, ARM_STATE *state) {
 
     char *rt_tok = tokens[1];
     uint32_t sf;
-    uint32_t rt = parse_register_token(rt_tok,&sf);
+    uint32_t rt = parse_register_token(rt_tok ,&sf);
     uint32_t L = (strcmp(tokens[0], "ldr") == 0) ? 1 : 0;
     uint32_t encoding;
 
@@ -44,11 +50,12 @@ uint32_t parse_loadstore(char **tokens, int num_toks, ARM_STATE *state) {
         }
 
         // ** DIV BY 4 MIGHT BE A MISTAKE **
-        uint32_t simm19 = (address - state->currAddress) / ADDR_INCREMENT;
+        uint32_t simm19 = ((address - state->currAddress) / ADDR_INCREMENT) & SIMM19_MASK;
         
         encoding = LOADLIT_ENCODING | rt | (simm19 << 5) | (sf << 30);
     } else {
         // 'single data transfer' instruction
+        printf("Single data transfer instruction \n"); //DEBUG
         addrmode_t addrmode = set_addrmode(tokens, num_toks);
         uint32_t U = 0;
         uint32_t xn = parse_register_token(tokens[2] + 1, NULL);
@@ -77,13 +84,13 @@ uint32_t parse_loadstore(char **tokens, int num_toks, ARM_STATE *state) {
             default:
                 // pre or post indexed
                 assert(num_toks == 4);
-                uint32_t simm9 = parse_imm(tokens[3]);
+                uint32_t simm9 = parse_simm(tokens[3], 9);
                 uint32_t I = (addrmode == PRE_INDEXED) ? 1 : 0;
                 offset = PREPOST_ENCODING | (I << 1) | (simm9 << 2);
                 break;
         }
 
-        encoding = SDT_ENCODING | rt | (xn << 5) | (offset << 10) |
+        encoding = SDT_ENCODING | rt | (xn << 5) | ((offset & 0xFFF) << 10) |
          (L << 22) | (U << 24) | (sf << 30);
     }
     return encoding;

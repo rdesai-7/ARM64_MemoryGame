@@ -308,27 +308,29 @@ uint32_t mov_wide_assembly(char** tokens, int token_count, ARM_STATE *state) {
 }
 
 uint32_t cmp_assembly(char** tokens, int token_count, ARM_STATE *state) {
-    char* new_tokens[4];
+    char* new_tokens[token_count + 1];
     uint32_t sf_bit = 0;
     parse_register_token(tokens[1], &sf_bit);
     new_tokens[0] = "subs";
     new_tokens[1] = "ZR";
-    new_tokens[2] = tokens[1];
-    new_tokens[3] = tokens[2];
+    for (int i = 2; i < token_count + 1; i++) {
+        new_tokens[i] = tokens[i - 1];
+    }
 
-    return assemble_add_sub_instruction(new_tokens, 4, state);
+    return assemble_add_sub_instruction(new_tokens, token_count + 1, state);
 }
 
 uint32_t cmn_assembly(char** tokens, int token_count, ARM_STATE *state) {
-    char* new_tokens[4];
+    char* new_tokens[token_count + 1];
     uint32_t sf_bit = 0;
     parse_register_token(tokens[1], &sf_bit);
     new_tokens[0] = "adds";
     new_tokens[1] = "ZR";
-    new_tokens[2] = tokens[1];
-    new_tokens[3] = tokens[2];
+    for (int i = 2; i < token_count + 1; i++) {
+        new_tokens[i] = tokens[i - 1];
+    }
 
-    return assemble_add_sub_instruction(new_tokens, 4, state);
+    return assemble_add_sub_instruction(new_tokens, token_count + 1, state);
 }
 
 uint32_t neg_assembly(char** tokens, int token_count, ARM_STATE *state) {
@@ -356,15 +358,16 @@ uint32_t negs_assembly(char** tokens, int token_count, ARM_STATE *state) {
 }
 
 uint32_t tst_assembly(char** tokens, int token_count, ARM_STATE *state) {
-    char* new_tokens[4];
+    char* new_tokens[token_count + 1];
     uint32_t sf_bit = 0;
     parse_register_token(tokens[1], &sf_bit);
     new_tokens[0] = "ands";
     new_tokens[1] = "ZR";
-    new_tokens[2] = tokens[1];
-    new_tokens[3] = tokens[2];
+    for (int i = 2; i < token_count + 1; i++) {
+        new_tokens[i] = tokens[i - 1];
+    }
 
-    return bit_logic_assembly(new_tokens, 4, state);
+    return bit_logic_assembly(new_tokens, token_count + 1, state);
 }
 
 uint32_t mvn_assembly(char** tokens, int token_count, ARM_STATE *state) {

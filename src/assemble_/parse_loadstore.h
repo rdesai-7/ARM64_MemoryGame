@@ -27,6 +27,7 @@ extern uint32_t parse_loadstore(char **tokens, int num_toks, ARM_STATE *state);
 #define PREPOST_ENCODING 0x1
 #define REGOFFSET_ENCODING 0x81A
 #define SDT_ENCODING 0xB8000000
+#define SIMM19_MASK 0x7FFFF
 
 
 #endif
