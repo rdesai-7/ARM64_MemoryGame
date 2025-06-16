@@ -1,5 +1,5 @@
-#ifndef PARSE_ARITH_H
-#define PARSE_ARITH_H
+#ifndef PARSE_DP_H
+#define PARSE_DP_H
 
 #include <stdint.h>
 #include <stddef.h>
