@@ -1,14 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <ctype.h>
-#include "symbol_table.h"
-#include "pass_one.h"
-#include "pass_two.h"
-#include "emulate_/emulator_state.h"
 #include "parse_loadstore.h"
-// include anshuls header file parse_arith.h
-
 
 uint32_t parse_imm(char *token) {
     // PRE: token is of the form "#imm"
@@ -34,7 +24,8 @@ addrmode_t set_addrmode(char **tokens, int num_toks) {
 
 
 uint32_t parse_loadstore(char **tokens, int num_toks, ARM_STATE *state) {
-    assert (tokens != NULL);
+    assert(tokens != NULL);
+    assert(state != NULL);
 
     char *rt_tok = tokens[1];
     uint32_t sf;
@@ -44,6 +35,7 @@ uint32_t parse_loadstore(char **tokens, int num_toks, ARM_STATE *state) {
 
     if (L == 1 && tokens[2][0] != '[') {
         // 'load literal' instruction
+        assert(num_toks == 3);
         uint32_t address;
         if (tokens[2][0] == '#') {
             address = parse_imm(tokens[2]); 
@@ -52,7 +44,7 @@ uint32_t parse_loadstore(char **tokens, int num_toks, ARM_STATE *state) {
         }
 
         // ** DIV BY 4 MIGHT BE A MISTAKE **
-        uint32_t simm19 = (address - state->curr_address) / 4;
+        uint32_t simm19 = (address - state->curr_address) / ADDR_INCREMENT;
         
         encoding = LOADLIT_ENCODING | rt | (simm19 << 5) | (sf << 30);
     } else {
@@ -69,6 +61,7 @@ uint32_t parse_loadstore(char **tokens, int num_toks, ARM_STATE *state) {
                     // zero unsigned offset
                     offset = 0;
                 } else {
+                    assert(num_toks == 4);
                     if (sf == 1) {
                         offset = parse_imm(tokens[3]) >> 3;
                     } else {
@@ -76,12 +69,14 @@ uint32_t parse_loadstore(char **tokens, int num_toks, ARM_STATE *state) {
                     }
                 }
                 break;
-            case REG_OFFSET:;
+            case REG_OFFSET:
+                assert(num_toks == 4);
                 uint32_t xm = parse_register_token(tokens[3], NULL);
                 offset = REGOFFSET_ENCODING | (xm << 6);
                 break;
-            default:;
+            default:
                 // pre or post indexed
+                assert(num_toks == 4);
                 uint32_t simm9 = parse_imm(tokens[3]);
                 uint32_t I = (addrmode == PRE_INDEXED) ? 1 : 0;
                 offset = PREPOST_ENCODING | (I << 1) | (simm9 << 2);
