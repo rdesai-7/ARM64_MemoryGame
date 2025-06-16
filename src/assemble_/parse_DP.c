@@ -51,8 +51,7 @@ extern uint32_t parse_shift_type(const char* shift_type_str) {
 
 }
 
-
-static uint32_t parse_register_token(char* reg_token, uint32_t* sf_bit) {
+uint32_t parse_register_token(char* reg_token, uint32_t* sf_bit) {
     
     if (strcmp(reg_token, "sp") == 0 || strcmp(reg_token, "xzr") == 0) {
         if (sf_bit != NULL) {
@@ -270,9 +269,9 @@ uint32_t assemble_add_sub_instruction(char** tokens, int token_count, ARM_STATE 
     assert(token_count < 4);
 
     if (tokens[3][0] == '#') {
-        return add_sub_immediate_assembly(tokens, token_count);
+        return add_sub_immediate_assembly(tokens, token_count, state);
     } else {
-        return add_sub_assembly(tokens, token_count);
+        return add_sub_assembly(tokens, token_count, state);
     }
 }
 
@@ -313,11 +312,11 @@ uint32_t cmp_assembly(char** tokens, int token_count, ARM_STATE *state) {
     uint32_t sf_bit = 0;
     parse_register_token(tokens[1], &sf_bit);
     new_tokens[0] = "subs";
-    new_tokens[1] = "ZR"
+    new_tokens[1] = "ZR";
     new_tokens[2] = tokens[1];
     new_tokens[3] = tokens[2];
 
-    return assemble_add_sub_instruction(new_tokens, 4);
+    return assemble_add_sub_instruction(new_tokens, 4, state);
 }
 
 uint32_t cmn_assembly(char** tokens, int token_count, ARM_STATE *state) {
@@ -329,7 +328,7 @@ uint32_t cmn_assembly(char** tokens, int token_count, ARM_STATE *state) {
     new_tokens[2] = tokens[1];
     new_tokens[3] = tokens[2];
 
-    return assemble_add_sub_instruction(new_tokens, 4);
+    return assemble_add_sub_instruction(new_tokens, 4, state);
 }
 
 uint32_t neg_assembly(char** tokens, int token_count, ARM_STATE *state) {
@@ -341,7 +340,7 @@ uint32_t neg_assembly(char** tokens, int token_count, ARM_STATE *state) {
     new_tokens[2] = "ZR";
     new_tokens[3] = tokens[2];
 
-    return assemble_add_sub_instruction(new_tokens, 4);
+    return assemble_add_sub_instruction(new_tokens, 4, state);
 }
 
 uint32_t negs_assembly(char** tokens, int token_count, ARM_STATE *state) {
@@ -353,7 +352,7 @@ uint32_t negs_assembly(char** tokens, int token_count, ARM_STATE *state) {
     new_tokens[2] = "ZR";
     new_tokens[3] = tokens[2];
 
-    return assemble_add_sub_instruction(new_tokens, 4);
+    return assemble_add_sub_instruction(new_tokens, 4, state);
 }
 
 uint32_t tst_assembly(char** tokens, int token_count, ARM_STATE *state) {
@@ -365,7 +364,7 @@ uint32_t tst_assembly(char** tokens, int token_count, ARM_STATE *state) {
     new_tokens[2] = tokens[1];
     new_tokens[3] = tokens[2];
 
-    return bit_logic_assembly(new_tokens, 4);
+    return bit_logic_assembly(new_tokens, 4, state);
 }
 
 uint32_t mvn_assembly(char** tokens, int token_count, ARM_STATE *state) {
@@ -377,7 +376,7 @@ uint32_t mvn_assembly(char** tokens, int token_count, ARM_STATE *state) {
     new_tokens[2] = "ZR";
     new_tokens[3] = tokens[2];
 
-    return bit_logic_assembly(new_tokens, 4);
+    return bit_logic_assembly(new_tokens, 4, state);
 }
 
 uint32_t mov_assembly(char** tokens, int token_count, ARM_STATE *state) {
@@ -389,7 +388,7 @@ uint32_t mov_assembly(char** tokens, int token_count, ARM_STATE *state) {
     new_tokens[2] = "ZR";
     new_tokens[3] = tokens[2];
     
-    return bit_logic_assembly(new_tokens, 4);
+    return bit_logic_assembly(new_tokens, 4, state);
 }
 
 uint32_t mul_assembly(char** tokens, int token_count, ARM_STATE *state) {
@@ -402,7 +401,7 @@ uint32_t mul_assembly(char** tokens, int token_count, ARM_STATE *state) {
     new_tokens[3] = tokens[3];
     new_tokens[4] = "ZR";
 
-    return multiply_assembly(new_tokens, 5);
+    return multiply_assembly(new_tokens, 5, state);
 }
 
 uint32_t mneg_assembly(char** tokens, int token_count, ARM_STATE *state) {
@@ -415,5 +414,5 @@ uint32_t mneg_assembly(char** tokens, int token_count, ARM_STATE *state) {
     new_tokens[3] = tokens[3];
     new_tokens[4] = "ZR";
 
-    return multiply_assembly(new_tokens, 5);
+    return multiply_assembly(new_tokens, 5, state);
 }
