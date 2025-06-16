@@ -9,41 +9,41 @@
 //ADD TOKEN COUNT CHECKS
 
 const InstructionOpcodeData opcode_lookup_table[] = {
-    {"and",  0b00, 0},
-    {"bic",  0b00, 1},
-    {"orr",  0b01, 0},
-    {"orn",  0b01, 1},
-    {"eor",  0b10, 0},
-    {"eon",  0b10, 1},
-    {"ands", 0b11, 0},
-    {"bics", 0b11, 1},
+    {"and",  0x0, 0},
+    {"bic",  0x0, 1},
+    {"orr",  0x1, 0},
+    {"orn",  0x1, 1},
+    {"eor",  0x2, 0},
+    {"eon",  0x2, 1},
+    {"ands", 0x3, 0},
+    {"bics", 0x3, 1},
 };
 const size_t NUM_OPCODE_ENTRIES = sizeof(opcode_lookup_table) / sizeof(InstructionOpcodeData);
 
 const AddSubOpcodeData add_sub_opcode_table[] = {
-    {"add",  0b00},
-    {"adds", 0b01},
-    {"sub",  0b10},
-    {"subs", 0b11},
+    {"add",  0x0},
+    {"adds", 0x1},
+    {"sub",  0x2},
+    {"subs", 0x3},
 };
 const size_t NUM_ADD_SUB_ENTRIES = sizeof(add_sub_opcode_table) / sizeof(AddSubOpcodeData);
 
 const MovWOpcData mov_w_opcode_table[] = {
-    {"movn", 0b00},
-    {"movz", 0b10},
-    {"movk", 0b11},
+    {"movn", 0x0},
+    {"movz", 0x2},
+    {"movk", 0x3},
 };
 const size_t NUM_MOV_W_ENTRIES = sizeof(mov_w_opcode_table) / sizeof(MovWOpcData);
 
 extern uint32_t parse_shift_type(const char* shift_type_str) {
     if (strcmp(shift_type_str, "lsl") == 0) {
-            return 0b00;
+            return 0x0;
         } else if (strcmp(shift_type_str, "lsr") == 0) {
-            return 0b01;
+            return 0x1;
         } else if (strcmp(shift_type_str, "asr") == 0) {
-            return 0b10;
+            return 0x2;
         } else if (strcmp(shift_type_str, "ror") == 0) {
-            return 0b11;
+            return 0x3;
         } else {
             fprintf(stderr, "Error: Invalid shift type '%s'\n", shift_type_str);
             return 0;
@@ -150,7 +150,7 @@ uint32_t bit_logic_assembly(char** tokens, int token_count, ARM_STATE *state) {
     uint32_t rd_reg_num, rn_reg_num, rm_reg_num;
     uint32_t opcode;
     uint32_t N_bit;
-    uint32_t shift_type_bits = 0b00;
+    uint32_t shift_type_bits = 0x0;
     uint32_t imm6_val = 0;
     uint32_t instruction = BIT_LOGIC_INITIAL_STATE;
     uint32_t sf_bit = 0;
@@ -193,7 +193,7 @@ uint32_t add_sub_assembly(char** tokens, int token_count, ARM_STATE *state) {
     uint32_t rd_reg_num, rn_reg_num, rm_reg_num;
     uint32_t opcode;
     uint32_t imm6_val = 0;
-    uint32_t shift_type_bits = 0b00;
+    uint32_t shift_type_bits = 0x0;
     uint32_t instruction = ADD_SUB_REGISTER_INITIAL_STATE;
     uint32_t sf_bit = 0;
 
