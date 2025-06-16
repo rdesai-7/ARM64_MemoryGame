@@ -1,5 +1,5 @@
-#ifndef PARSER_H
-#define PARSER_H
+#ifndef PARSE_ARITH_H
+#define PARSE_ARITH_H
 
 #include <stdint.h>
 #include <stddef.h>
@@ -25,8 +25,7 @@ extern const size_t NUM_OPCODE_ENTRIES;
 
 typedef struct {
     const char* mnemonic;
-    uint8_t op_bit;
-    uint8_t S_bit;
+    uint32_t opc;
 } AddSubOpcodeData;
 
 extern const AddSubOpcodeData add_sub_opcode_table[];
@@ -34,13 +33,14 @@ extern const size_t NUM_ADD_SUB_ENTRIES;
 
 typedef struct {
     const char* mnemonic;
-    uint8_t opc;
+    uint32_t opc;
 } MovWOpcData;
 
 extern const MovWOpcData mov_w_opcode_table[];
 extern const size_t NUM_MOV_W_ENTRIES;
 
 extern uint32_t parse_imm(char* token);
+extern uint32_t parse_shift_type(const char* shift_type_str);
 
 extern uint32_t multiply_assembly(char** tokens, uint32_t token_count);
 extern uint32_t bit_logic_assembly(char** tokens, uint32_t token_count);
