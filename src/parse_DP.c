@@ -117,7 +117,7 @@ int get_mov_opcode(const char* mnemonic, uint32_t* opc_out) {
     return 0;
 }
 
-uint32_t multiply_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
+uint32_t multiply_assembly(char** tokens, int token_count, ARM_STATE *state) {
     uint32_t rd_reg_num, rn_reg_num, rm_reg_num, ra_reg_num;
     uint32_t instruction = MUL_INITIAL_STATE;
     uint32_t sf_bit = 0;
@@ -146,7 +146,7 @@ uint32_t multiply_assembly(char** tokens, uint32_t token_count, ARM_STATE *state
     return instruction;
 }
 
-uint32_t bit_logic_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
+uint32_t bit_logic_assembly(char** tokens, int token_count, ARM_STATE *state) {
     uint32_t rd_reg_num, rn_reg_num, rm_reg_num;
     uint32_t opcode;
     uint32_t N_bit;
@@ -189,7 +189,7 @@ uint32_t bit_logic_assembly(char** tokens, uint32_t token_count, ARM_STATE *stat
     return instruction;
 }
 
-uint32_t add_sub_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
+uint32_t add_sub_assembly(char** tokens, int token_count, ARM_STATE *state) {
     uint32_t rd_reg_num, rn_reg_num, rm_reg_num;
     uint32_t opcode;
     uint32_t imm6_val = 0;
@@ -229,7 +229,7 @@ uint32_t add_sub_assembly(char** tokens, uint32_t token_count, ARM_STATE *state)
     return instruction;
 }
 
-uint32_t add_sub_immediate_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
+uint32_t add_sub_immediate_assembly(char** tokens, int token_count, ARM_STATE *state) {
     uint32_t rd_reg_num, rn_reg_num;
     uint32_t opcode;
     uint32_t imm12_val;
@@ -266,7 +266,7 @@ uint32_t add_sub_immediate_assembly(char** tokens, uint32_t token_count, ARM_STA
     return instruction;
 }
 
-uint32_t assemble_add_sub_instruction(char** tokens, uint32_t token_count, ARM_STATE *state) {
+uint32_t assemble_add_sub_instruction(char** tokens, int token_count, ARM_STATE *state) {
     assert(token_count < 4);
 
     if (tokens[3][0] == '#') {
@@ -276,7 +276,7 @@ uint32_t assemble_add_sub_instruction(char** tokens, uint32_t token_count, ARM_S
     }
 }
 
-uint32_t mov_wide_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
+uint32_t mov_wide_assembly(char** tokens, int token_count, ARM_STATE *state) {
     uint32_t rd_reg_num;
     uint32_t opc_val;
     uint32_t imm16_val;
@@ -308,7 +308,7 @@ uint32_t mov_wide_assembly(char** tokens, uint32_t token_count, ARM_STATE *state
     return instruction;
 }
 
-uint32_t cmp_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
+uint32_t cmp_assembly(char** tokens, int token_count, ARM_STATE *state) {
     char* new_tokens[4];
     uint32_t sf_bit = 0;
     parse_register_token(tokens[1], &sf_bit);
@@ -320,7 +320,7 @@ uint32_t cmp_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
     return assemble_add_sub_instruction(new_tokens, 4);
 }
 
-uint32_t cmn_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
+uint32_t cmn_assembly(char** tokens, int token_count, ARM_STATE *state) {
     char* new_tokens[4];
     uint32_t sf_bit = 0;
     parse_register_token(tokens[1], &sf_bit);
@@ -332,7 +332,7 @@ uint32_t cmn_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
     return assemble_add_sub_instruction(new_tokens, 4);
 }
 
-uint32_t neg_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
+uint32_t neg_assembly(char** tokens, int token_count, ARM_STATE *state) {
     char* new_tokens[4];
     uint32_t sf_bit = 0;
     parse_register_token(tokens[1], &sf_bit);
@@ -344,7 +344,7 @@ uint32_t neg_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
     return assemble_add_sub_instruction(new_tokens, 4);
 }
 
-uint32_t negs_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
+uint32_t negs_assembly(char** tokens, int token_count, ARM_STATE *state) {
     char* new_tokens[4];
     uint32_t sf_bit = 0;
     parse_register_token(tokens[1], &sf_bit);
@@ -356,7 +356,7 @@ uint32_t negs_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
     return assemble_add_sub_instruction(new_tokens, 4);
 }
 
-uint32_t tst_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
+uint32_t tst_assembly(char** tokens, int token_count, ARM_STATE *state) {
     char* new_tokens[4];
     uint32_t sf_bit = 0;
     parse_register_token(tokens[1], &sf_bit);
@@ -368,7 +368,7 @@ uint32_t tst_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
     return bit_logic_assembly(new_tokens, 4);
 }
 
-uint32_t mvn_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
+uint32_t mvn_assembly(char** tokens, int token_count, ARM_STATE *state) {
     char* new_tokens[4];
     uint32_t sf_bit = 0;
     parse_register_token(tokens[1], &sf_bit);
@@ -380,7 +380,7 @@ uint32_t mvn_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
     return bit_logic_assembly(new_tokens, 4);
 }
 
-uint32_t mov_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
+uint32_t mov_assembly(char** tokens, int token_count, ARM_STATE *state) {
     char* new_tokens[4];
     uint32_t sf_bit = 0;
     parse_register_token(tokens[1], &sf_bit);
@@ -392,7 +392,7 @@ uint32_t mov_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
     return bit_logic_assembly(new_tokens, 4);
 }
 
-uint32_t mul_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
+uint32_t mul_assembly(char** tokens, int token_count, ARM_STATE *state) {
     char* new_tokens[5];
     uint32_t sf_bit = 0;
     parse_register_token(tokens[1], &sf_bit);
@@ -405,7 +405,7 @@ uint32_t mul_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
     return multiply_assembly(new_tokens, 5);
 }
 
-uint32_t mneg_assembly(char** tokens, uint32_t token_count, ARM_STATE *state) {
+uint32_t mneg_assembly(char** tokens, int token_count, ARM_STATE *state) {
     char* new_tokens[5];
     uint32_t sf_bit = 0;
     parse_register_token(tokens[1], &sf_bit);
