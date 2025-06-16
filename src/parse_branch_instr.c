@@ -8,6 +8,7 @@
 #include "symbol_table.h"
 #include "pass_one.h"
 #include "parse_branch_instr.h"
+#include "assembler_state.h"
 
 
 
