@@ -79,7 +79,6 @@ bool run_pass_two( const char *filename, ARM_STATE *state) {
     }
 
     char line_buffer[LINE_BUFFER];
-    uint32_t curr_address = state->currAddress;
 
     while( fgets(line_buffer, sizeof(line_buffer), file) != NULL ) {
         char *line = trim_whitespace(line_buffer);
@@ -90,7 +89,7 @@ bool run_pass_two( const char *filename, ARM_STATE *state) {
             //deal with .int directives
             if (is_directive(line)) {
                 uint32_t N = parse_directive(line);
-                state->binaryInstructions[curr_address] = N;
+                state->binaryInstructions[state->currAddress] = N;
             } else {
                 //all other instructions
                 
@@ -104,19 +103,25 @@ bool run_pass_two( const char *filename, ARM_STATE *state) {
                 char *current_mnemonic = (strncmp(tokens[0], "b.", 2) == 0) ? "b.cond" : tokens[0]; //Generalises b.cond mnemonic
 
                 //Select correct parse function based on mnemonic and parses instruction
-                uint32_t curr_instruction = 0;
+                uint32_t curr_instruction;
+                bool instr_assigned = false;
                 for (int i = 0; instruction_table[i].mnemonic != NULL; i++) {
                     if (strcmp(current_mnemonic, instruction_table[i].mnemonic) == 0) {
                         curr_instruction = instruction_table[i].parser(tokens, num_tokens, state);
+                        instr_assigned = true;
                         break;
                     }
                 }
-
-                //store current instruction in memory OR write to file?
-                state->binaryInstructions[curr_address] = curr_instruction;
+                if (!instr_assigned) {
+                    fprintf(stderr, "Mnemonic doesn't match anything in the table");
+                    return false;
+                } else {
+                     //store current instruction in memory OR write to file?
+                    state->binaryInstructions[state->currAddress] = curr_instruction;
+                } 
             }
 
-            curr_address += ADDR_INCREMENT;
+            state->currAddress += ADDR_INCREMENT;
         }
     }
 
