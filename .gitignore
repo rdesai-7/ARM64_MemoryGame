@@ -34,5 +34,3 @@ assemble
 *.toc
 
 armv8_testsuite/
-test.c 
-test
