@@ -23,10 +23,10 @@ extern addrmode_t set_addrmode(char **tokens, int num_toks);
 extern uint32_t parse_loadstore(char **tokens, int num_toks, ARM_STATE *state);
 
 // initial binary encodings
-#define LOADLIT_ENCODING 0b00011000000000000000000000000000
-#define PREPOST_ENCODING 1
-#define REGOFFSET_ENCODING 0b100000011010
-#define SDT_ENCODING 0b10111000000000000000000000000000
+#define LOADLIT_ENCODING 0x18000000
+#define PREPOST_ENCODING 0x1
+#define REGOFFSET_ENCODING 0x81A
+#define SDT_ENCODING 0xB8000000
 
 
 #endif

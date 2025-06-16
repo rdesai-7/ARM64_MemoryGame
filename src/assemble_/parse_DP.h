@@ -9,11 +9,11 @@
 #define ZERO_REGISTER 31
 #define STACK_POINTER 31
 
-#define MUL_INITIAL_STATE (((uint32_t)0b0011011000) << 21)
-#define BIT_LOGIC_INITIAL_STATE (((uint32_t)0b01010) << 24) 
-#define ADD_SUB_REGISTER_INITIAL_STATE (((uint32_t)0b01011) << 24)
-#define ADD_SUB_IMMEDIATE_INITIAL_STATE (((uint32_t)0b100010) << 23)
-#define MOV_INITIAL_STATE (((uint32_t)0b100101) << 23)
+#define MUL_INITIAL_STATE (((uint32_t)0xD8) << 21)
+#define BIT_LOGIC_INITIAL_STATE (((uint32_t)0xA) << 24) 
+#define ADD_SUB_REGISTER_INITIAL_STATE (((uint32_t)0xB) << 24)
+#define ADD_SUB_IMMEDIATE_INITIAL_STATE (((uint32_t)0x22) << 23)
+#define MOV_INITIAL_STATE (((uint32_t)0x25) << 23)
 
 
 typedef struct {
