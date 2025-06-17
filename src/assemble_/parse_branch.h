@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
+#include "defns.h"
 #include "symbol_table.h"
 #include "pass_one.h"
 #include "assembler_state.h"

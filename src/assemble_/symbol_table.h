@@ -7,8 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-
-#define MAX_LABEL_LENGTH 128
+#include "defns.h"
 
 // Struct defines an entry with a name and its address
 typedef struct {

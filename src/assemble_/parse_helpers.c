@@ -1,5 +1,55 @@
 #include "parse_helpers.h"
 
+char* trim_whitespace(char *s) {
+
+    while( isspace(*s) ) s++;
+    if(*s == '\0') return s;
+
+    char *end = s + strlen(s) - 1;
+    // Removes whitespace from the end
+    while ( (end > s && isspace(*end)) ) end--;
+    *(end + 1) = '\0';
+    return s;
+}
+
+bool is_line_empty(const char *line) {
+    if (line == NULL || *line == '\0') return true;
+    return false;
+}
+
+bool is_label(const char *line, char *label_name_out) {
+    // Trim whitespace should already be called
+
+    // No need to check first character is valid label character  
+    size_t len = strlen(line);
+    if (len - 1 >= MAX_LABEL_LENGTH) {
+        fprintf(stderr, "Label too long to fit");
+        return false;
+    }
+
+    // Check last character is colon
+    // Label_name_out will have enough space since it will be initialised with MAX_LABEL_LENGTH
+    if( line[len - 1] == ':' ) {
+        strncpy( label_name_out, line, len -1);
+        label_name_out[len - 1] = '\0';
+        return true;
+    }
+
+    return false;
+}
+
+bool is_directive(char *s) {
+    return strncmp(s, ".int", 4) == 0;
+}
+
+uint32_t parse_directive(char *line) {
+    // PRE: is_directive(line) returns true
+    int value;
+    // sscanf parses hex and decimal values using %i
+    assert(sscanf(line, ".int %i", &value) == 1);
+    return (uint32_t) value;
+}
+
 uint32_t parse_imm(char *token) {
     // PRE: token is of the form "#imm"
     // trailing chars ignored

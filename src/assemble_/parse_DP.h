@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "defns.h"
 #include "assembler_state.h"
 #include "parse_helpers.h"
 
@@ -51,9 +52,5 @@ extern uint32_t mvn_assembly(char** tokens, int token_count, ARM_STATE *state);
 extern uint32_t mov_assembly(char** tokens, int token_count, ARM_STATE *state);
 extern uint32_t mul_assembly(char** tokens, int token_count, ARM_STATE *state);
 extern uint32_t mneg_assembly(char** tokens, int token_count, ARM_STATE *state);
-
-extern uint32_t get_logic_opcode(const char* mnemonic, uint32_t *N);
-extern int get_add_sub_opcode(const char* mnemonic, uint32_t* opc_out);
-extern int get_mov_opcode(const char* mnemonic, uint32_t* opc_out);
 
 #endif

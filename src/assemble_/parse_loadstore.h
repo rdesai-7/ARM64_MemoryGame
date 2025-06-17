@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 #include <ctype.h>
+#include <assert.h>
+#include "defns.h"
 #include "symbol_table.h"
-#include "pass_one.h"
-#include "pass_two.h"
 #include "parse_helpers.h"
 #include "assembler_state.h"
 
@@ -17,7 +17,6 @@ typedef enum {
     REG_OFFSET
 } addrmode_t;
 
-extern addrmode_t set_addrmode(char **tokens, int num_toks);
 extern uint32_t parse_loadstore(char **tokens, int num_toks, ARM_STATE *state);
 
 // initial binary encodings

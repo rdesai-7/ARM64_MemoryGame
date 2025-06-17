@@ -35,19 +35,7 @@ instruction_entry_t instruction_table[] = {
     {NULL, NULL},
 };
 
-bool is_directive(char *s) {
-    return strncmp(s, ".int", 4) == 0;
-}
-
-uint32_t parse_directive(char *line) {
-    // PRE: is_directive(line) returns true
-    int value;
-    // sscanf parses hex and decimal values using %i
-    assert(sscanf(line, ".int %i", &value) == 1);
-    return (uint32_t) value;
-}
-
-void tokenize(char *str, char *delim, char *tokens[], int *num_tokens) {
+static void tokenize(char *str, char *delim, char *tokens[], int *num_tokens) {
     char *token;
     char *save_ptr = NULL;
     int curr_token_count = 0;
@@ -81,23 +69,15 @@ bool run_pass_two( const char *filename, ARM_STATE *state) {
                 uint32_t N = parse_directive(line);
                 state->binaryInstructions[state->currAddress / ADDR_INCREMENT] = N;
             } else {
-                //all other instructions
-                
+
                 //Tokenise the line
                 char *tokens[MAX_TOKENS];
                 int num_tokens = 0;
-                //char line_buffer[256];
-                //strcpy(line_buffer, line);
                 tokenize(line, ", ", tokens, &num_tokens);
-
-                for (int i = 0; i < num_tokens; i++) {
-                    printf("Token %d: \"%s\" ", i + 1, tokens[i]);
-                }
-                printf("\n");
 
                 char *current_mnemonic = (strncmp(tokens[0], "b.", 2) == 0) ? "b.cond" : tokens[0]; //Generalises b.cond mnemonic
 
-                //Select correct parse function based on mnemonic and parses instruction
+                //Select correct parse function based on mnemonic and parse instruction
                 uint32_t curr_instruction;
                 bool instr_assigned = false;
                 for (int i = 0; instruction_table[i].mnemonic != NULL; i++) {
@@ -108,10 +88,10 @@ bool run_pass_two( const char *filename, ARM_STATE *state) {
                     }
                 }
                 if (!instr_assigned) {
-                    fprintf(stderr, "Mnemonic doesn't match anything in the table");
+                    fprintf(stderr, "Mnemonic \"%s\" doesn't match to any entries in the lookup table",tokens[0]);
                     return false;
                 } else {
-                     //store current instruction in memory OR write to file?
+                    //append current instruction to array
                     state->binaryInstructions[state->currAddress / ADDR_INCREMENT] = curr_instruction;
                 } 
             }
@@ -130,6 +110,3 @@ bool run_pass_two( const char *filename, ARM_STATE *state) {
     fclose(file);
     return true;
 }
-
-//instructions need to be stored somewhere
-//make an assembler state type that stores the symbol table, the binary instructions (in a memory array format), and the current address

@@ -1,9 +1,8 @@
 #include "parse_loadstore.h"
 
-
-addrmode_t set_addrmode(char **tokens, int num_toks) {
+static addrmode_t set_addrmode(char **tokens, int num_toks) {
     if (num_toks == 3) {
-        // zero unsigned offset
+        // addressing mode is 'zero unsigned offset'
         return U_OFFSET;
     } else if (tokens[2][strlen(tokens[2]) - 1] == ']') {
         return POST_INDEXED;
@@ -37,13 +36,11 @@ uint32_t parse_loadstore(char **tokens, int num_toks, ARM_STATE *state) {
             getSymbolEntry(state->symbolTable, tokens[2], &address);
         }
 
-        // ** DIV BY 4 MIGHT BE A MISTAKE **
         uint32_t simm19 = ((address - state->currAddress) / ADDR_INCREMENT) & SIMM19_MASK;
-        
+
         encoding = LOADLIT_ENCODING | rt | (simm19 << 5) | (sf << 30);
     } else {
         // 'single data transfer' instruction
-        printf("Single data transfer instruction \n"); //DEBUG
         addrmode_t addrmode = set_addrmode(tokens, num_toks);
         uint32_t U = 0;
         uint32_t xn = parse_register_token(tokens[2] + 1, NULL);
