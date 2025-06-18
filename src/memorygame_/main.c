@@ -12,7 +12,7 @@ void display_success()
 void display_failure()
 void flash_led(int button_num);
 
-get_user_sequence_input(game_state_t game_state)
+void get_user_sequence_input(game_state_t *game_state)
 ^ read seq_len button inputs from user, and store this in user_sequence
 */
 
@@ -25,6 +25,7 @@ void initialise(game_state_t *game_state) {
 void success(game_state_t *game_state) {
     display_success();
     game_state->mode = LED_FLASH;
+    game_state->user_seq_len = 0;
 }
 
 void failure(game_state_t *game_state) {
@@ -46,7 +47,7 @@ bool check_seq(game_state_t *game_state) {
 
 void append_to_sequence(game_state_t *game_state) {
     if (game_state->seq_len == MAX_SEQ_LEN) {
-        printf("Sequence has reached maximum length.\n");
+        printf("LED sequence has reached maximum length.\n");
         return;
     }
     // random number 0 to NUM_BUTTONS-1
@@ -58,8 +59,8 @@ void append_to_sequence(game_state_t *game_state) {
 void flash_led_seq(game_state_t *game_state) {
     for (int i = 0; i < game_state->seq_len; i++) {
         int button_num = game_state->led_sequence[i];
-        flash_led(button_num);
-        usleep(500000); // sleep for 0.5s
+        flash_led(button_num,&game_state);
+        usleep(FLASH_TIME); // sleep for 0.5s
     }
 }
 
