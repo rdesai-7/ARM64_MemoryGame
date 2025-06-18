@@ -16,10 +16,32 @@ get_user_sequence_input(game_state_t game_state)
 ^ read seq_len button inputs from user, and store this in user_sequence
 */
 
+int *led_pins[] = {L0_PIN, L1_PIN, L2_PIN}
+int *button_pins[] = {B0_PIN, B1_PIN, B2_PIN}
+const char *chipname = "gpiochip0";
+
+
+
 void initialise(game_state_t *game_state) {
     game_state->mode = IDLE;
     game_state->seq_len = 0;
     game_state->user_seq_len = 0;
+
+    struct gpiod_chip *chip = chip = gpiod_chip_open_by_name(chipname);
+
+
+
+    for (i = 0; i < NUM_BUTTONS; i++) {
+        game_state->button_lines[i] =  gpiod_chip_get_line(chip, button_pins[i]);
+        assert(game_state->button_lines[i] != NULL);
+
+        game_state->led_lines[i] =  gpiod_chip_get_line(chip, led_pins[i]);
+        assert(game_state->led_lines[i] != NULL);
+
+        gpiod_line_request_output(game_state->led_lines[i], "led_button_x3", 0);
+        gpiod_line_request_input_flags(game_state->button_lines[i], "led_button_x3", GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP);
+    }
+
 }
 
 void success(game_state_t *game_state) {
@@ -57,9 +79,8 @@ void append_to_sequence(game_state_t *game_state) {
 
 void flash_led_seq(game_state_t *game_state) {
     for (int i = 0; i < game_state->seq_len; i++) {
-        int button_num = game_state->led_sequence[i];
-        flash_led(button_num);
-        usleep(500000); // sleep for 0.5s
+        int led_num = game_state->led_sequence[i];
+        flash_led(led_num);
     }
 }
 
