@@ -3,7 +3,10 @@
 // read seq_len button inputs from user, and store this in user_sequence
 void get_user_sequence_input(game_state_t *game_state) {
     int expected_n = game_state->seq_len;
-    int prev_button_inps[NUM_BUTTONS] = {1};
+    int prev_button_inps[NUM_BUTTONS];
+    for (int i = 0; i < NUM_BUTTONS; i++) {
+        prev_button_inps[i] = 1;
+    }
     int button_inps[NUM_BUTTONS];
     while(game_state->user_seq_len < expected_n) {
 

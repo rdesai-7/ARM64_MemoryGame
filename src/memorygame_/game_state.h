@@ -1,3 +1,6 @@
+#ifndef GAME_STATE_H
+#define GAME_STATE_H
+
 #define MAX_SEQ_LEN 100
 #define NUM_BUTTONS 3
 #define NUM_LEDS NUM_BUTTONS
@@ -32,3 +35,5 @@ typedef struct {
     struct gpiod_line *led_lines[NUM_LEDS];
     struct gpiod_line *button_lines[NUM_BUTTONS];
 } game_state_t;
+
+#endif

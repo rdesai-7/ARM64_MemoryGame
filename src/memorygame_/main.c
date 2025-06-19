@@ -1,11 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <assert.h>
+#include <gpiod.h>
 #include "game_state.h"
 #include "end_outputs.h"
+#include "button_inputs.h"
 
-int led_pins[] = {L0_PIN, L1_PIN, L2_PIN}
-int button_pins[] = {B0_PIN, B1_PIN, B2_PIN}
+int led_pins[] = {L0_PIN, L1_PIN, L2_PIN};
+int button_pins[] = {B0_PIN, B1_PIN, B2_PIN};
 const char *chipname = "gpiochip0";
 
 void reset(game_state_t *game_state) {
@@ -19,9 +24,7 @@ void initialise(game_state_t *game_state) {
 
     struct gpiod_chip *chip = chip = gpiod_chip_open_by_name(chipname);
 
-
-
-    for (i = 0; i < NUM_BUTTONS; i++) {
+    for (int i = 0; i < NUM_BUTTONS; i++) {
         game_state->button_lines[i] =  gpiod_chip_get_line(chip, button_pins[i]);
         assert(game_state->button_lines[i] != NULL);
 
@@ -35,13 +38,13 @@ void initialise(game_state_t *game_state) {
 }
 
 void success(game_state_t *game_state) {
-    display_success();
+    display_success(&game_state);
     game_state->mode = LED_FLASH;
     game_state->user_seq_len = 0;
 }
 
 void failure(game_state_t *game_state) {
-    display_failure();
+    display_failure(&game_state);
     reset(&game_state);
 }
 
@@ -71,7 +74,7 @@ void append_to_sequence(game_state_t *game_state) {
 void flash_led_seq(game_state_t *game_state) {
     for (int i = 0; i < game_state->seq_len; i++) {
         int led_num = game_state->led_sequence[i];
-        flash_led(led_num);
+        flash_led(led_num, &game_state);
     }
 }
 
@@ -83,12 +86,12 @@ int main(int argc, char *argv[]) {
     initialise(&game_state);
 
     while(true) {
-        switch(game_state){
+        switch(game_state.mode){
             case IDLE:
                 int b0_inp, b2_inp;
                 while(true) {
-                    int b0_inp = gpiod_line_get_value(game_state->button_lines[0]);
-                    int b2_inp = gpiod_line_get_value(game_state->button_lines[2]);
+                    int b0_inp = gpiod_line_get_value(game_state.button_lines[0]);
+                    int b2_inp = gpiod_line_get_value(game_state.button_lines[2]);
 
                     if (b0_inp == 0 && b2_inp == 0) {
                         game_state.mode == LED_FLASH;
