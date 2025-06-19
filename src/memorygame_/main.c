@@ -2,19 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "game_state.h"
-
-
-/* functions to make
-
-func to get input from buttons
-
-void display_success()
-void display_failure()
-void flash_led(int button_num);
-
-get_user_sequence_input(game_state_t game_state)
-^ read seq_len button inputs from user, and store this in user_sequence
-*/
+#include "end_outputs.h"
 
 int led_pins[] = {L0_PIN, L1_PIN, L2_PIN}
 int button_pins[] = {B0_PIN, B1_PIN, B2_PIN}
@@ -49,6 +37,7 @@ void initialise(game_state_t *game_state) {
 void success(game_state_t *game_state) {
     display_success();
     game_state->mode = LED_FLASH;
+    game_state->user_seq_len = 0;
 }
 
 void failure(game_state_t *game_state) {
@@ -70,7 +59,7 @@ bool check_seq(game_state_t *game_state) {
 
 void append_to_sequence(game_state_t *game_state) {
     if (game_state->seq_len == MAX_SEQ_LEN) {
-        printf("Sequence has reached maximum length.\n");
+        printf("LED sequence has reached maximum length.\n");
         return;
     }
     // random number 0 to NUM_BUTTONS-1
@@ -96,12 +85,17 @@ int main(int argc, char *argv[]) {
     while(true) {
         switch(game_state){
             case IDLE:
+                int b0_inp, b2_inp;
                 while(true) {
-                    // get input from buttons... waiting to start the game
-                    // if (specific input from button) {
-                    //     game_state.mode == LED_FLASH;
-                    //     break; 
-                    // }
+                    int b0_inp = gpiod_line_get_value(game_state->button_lines[0]);
+                    int b2_inp = gpiod_line_get_value(game_state->button_lines[2]);
+
+                    if (b0_inp == 0 && b2_inp == 0) {
+                        game_state.mode == LED_FLASH;
+                        break;
+                    }
+                    
+                    usleep(INPUT_READ_DELAY * 2);
                 }
                 break;
             case LED_FLASH:
