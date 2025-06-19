@@ -8,8 +8,8 @@ void flash_led(int led_num, game_state_t *game_state, int sleep_time) {
 }
 
 void display_success(game_state_t *game_state) {
-    for (int i = 0; i < 3; i++) {
-        flash_led(SUCCESS_LED_NUM, game_state, FLASH_TIME/2);
+    for (int i = 0; i < 10; i++) {
+        flash_led(SUCCESS_LED_NUM, game_state, FLASH_TIME/4);
     }
 }
 

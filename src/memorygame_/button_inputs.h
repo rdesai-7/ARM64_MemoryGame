@@ -8,6 +8,7 @@
 #include "game_state.h"
 #include <gpiod.h>
 
-extern void get_user_sequence_input(game_state_t *game_state);
+extern void print_int_arr(int arr[], int len, char *starting_str);
+extern bool get_user_sequence_input(game_state_t *game_state);
 
 #endif

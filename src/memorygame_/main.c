@@ -63,9 +63,13 @@ bool check_seq(game_state_t *game_state) {
     return true;
 }
 
+// TODO: return bool for error checking
 void append_to_sequence(game_state_t *game_state) {
     if (game_state->seq_len == MAX_SEQ_LEN) {
         printf("LED sequence has reached maximum length.\n");
+        display_success(game_state);
+        reset(game_state);
+        game_state->mode = IDLE;
         return;
     }
     // random number 0 to NUM_BUTTONS-1
@@ -110,11 +114,9 @@ int main(int argc, char *argv[]) {
                 usleep(FLASH_TIME);
                 // appends a random number 0..NUM_BUTTONS-1 to the sequence, incrementing seq_len
                 append_to_sequence(&game_state);
-                printf("LED sequence: ");
-                for (int i = 0; i < game_state.seq_len; i++) {
-                    printf("%d, ",game_state.led_sequence[i]);
-                }
-                printf("\n");
+
+                print_int_arr(game_state.led_sequence,game_state.seq_len,"LED sequence: ");
+                
                 flash_led_seq(&game_state);
                 game_state.mode = PLAYER_TURN;
                 break;
@@ -122,20 +124,9 @@ int main(int argc, char *argv[]) {
                 printf("mode: PLAYER_TURN\n");
                 // optional: user can time-out if no input for X seconds
 
-                get_user_sequence_input(&game_state); // get seq_len button inputs from user, store this in user_sequence
-
-                printf("USER sequence: ");
-                for (int i = 0; i < game_state.user_seq_len; i++) {
-                    printf("%d, ",game_state.user_sequence[i]);
-                }
-                printf("\n");
-
-                bool success_flag = check_seq(&game_state);
-                if (success_flag) {
-                    // handle success
+                if (get_user_sequence_input(&game_state) && check_seq(&game_state)) {
                     success(&game_state);
                 } else {
-                    // handle failure
                     failure(&game_state);
                 }
                 break;
