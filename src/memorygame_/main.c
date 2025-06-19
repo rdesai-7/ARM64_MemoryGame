@@ -16,16 +16,18 @@ get_user_sequence_input(game_state_t game_state)
 ^ read seq_len button inputs from user, and store this in user_sequence
 */
 
-int *led_pins[] = {L0_PIN, L1_PIN, L2_PIN}
-int *button_pins[] = {B0_PIN, B1_PIN, B2_PIN}
+int led_pins[] = {L0_PIN, L1_PIN, L2_PIN}
+int button_pins[] = {B0_PIN, B1_PIN, B2_PIN}
 const char *chipname = "gpiochip0";
 
-
-
-void initialise(game_state_t *game_state) {
+void reset(game_state_t *game_state) {
     game_state->mode = IDLE;
     game_state->seq_len = 0;
     game_state->user_seq_len = 0;
+}
+
+void initialise(game_state_t *game_state) {
+    reset(&game_state);
 
     struct gpiod_chip *chip = chip = gpiod_chip_open_by_name(chipname);
 
@@ -38,8 +40,8 @@ void initialise(game_state_t *game_state) {
         game_state->led_lines[i] =  gpiod_chip_get_line(chip, led_pins[i]);
         assert(game_state->led_lines[i] != NULL);
 
-        gpiod_line_request_output(game_state->led_lines[i], "led_button_x3", 0);
-        gpiod_line_request_input_flags(game_state->button_lines[i], "led_button_x3", GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP);
+        gpiod_line_request_output(game_state->led_lines[i], "memory game", 0);
+        gpiod_line_request_input_flags(game_state->button_lines[i], "memory game", GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP);
     }
 
 }
@@ -51,7 +53,7 @@ void success(game_state_t *game_state) {
 
 void failure(game_state_t *game_state) {
     display_failure();
-    initialise(&game_state);
+    reset(&game_state);
 }
 
 bool check_seq(game_state_t *game_state) {
