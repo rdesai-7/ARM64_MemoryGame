@@ -7,6 +7,14 @@
 #define SUCCESS_LED_NUM 0
 #define FAILURE_LED_NUM 2
 
+#define L0_PIN 26
+#define B0_PIN 4
+#define L1_PIN 19
+#define B1_PIN 3
+#define L2_PIN 13
+#define B2_PIN 2 
+
+
 // game mode
 typedef enum {
     IDLE,
