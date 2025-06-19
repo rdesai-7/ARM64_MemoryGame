@@ -9,8 +9,8 @@
 #include "end_outputs.h"
 #include "button_inputs.h"
 
-int led_pins[] = {L0_PIN, L1_PIN, L2_PIN};
-int button_pins[] = {B0_PIN, B1_PIN, B2_PIN};
+int led_pins[] = {L0_PIN, L1_PIN, L2_PIN, L3_PIN, L4_PIN, L5_PIN};
+int button_pins[] = {B0_PIN, B1_PIN, B2_PIN, B3_PIN, B4_PIN, B5_PIN};
 const char *chipname = "gpiochip0";
 
 void reset(game_state_t *game_state) {
@@ -31,7 +31,7 @@ void initialise(game_state_t *game_state) {
         game_state->led_lines[i] =  gpiod_chip_get_line(chip, led_pins[i]);
         assert(game_state->led_lines[i] != NULL);
 
-        gpiod_line_request_output(game_state->led_lines[i], "memory game", 0);
+        gpiod_line_request_output(game_state->led_lines[i], "memory game", 1); //CHANGE T0 0
         gpiod_line_request_input_flags(game_state->button_lines[i], "memory game", GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP);
     }
 
@@ -95,13 +95,13 @@ int main(int argc, char *argv[]) {
     while(true) {
         switch(game_state.mode){
             case IDLE: {
-                int b0_inp, b2_inp;
+                int b0_inp, b5_inp;
                 printf("mode: IDLE\n");
                 while(true) {
                     b0_inp = gpiod_line_get_value(game_state.button_lines[0]);
-                    b2_inp = gpiod_line_get_value(game_state.button_lines[2]);
+                    b5_inp = gpiod_line_get_value(game_state.button_lines[5]);
 
-                    if (b0_inp == 0 && b2_inp == 0) {
+                    if (b0_inp == 0 && b5_inp == 0) {
                         game_state.mode = LED_FLASH;
                         break;
                     }
