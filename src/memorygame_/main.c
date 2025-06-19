@@ -2,19 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "game_state.h"
-
-
-/* functions to make
-
-func to get input from buttons
-
-void display_success()
-void display_failure()
-void flash_led(int button_num);
-
-void get_user_sequence_input(game_state_t *game_state)
-^ read seq_len button inputs from user, and store this in user_sequence
-*/
+#include "end_outputs.h"
 
 void initialise(game_state_t *game_state) {
     game_state->mode = IDLE;
@@ -74,12 +62,17 @@ int main(int argc, char *argv[]) {
     while(true) {
         switch(game_state){
             case IDLE:
+                int b0_inp, b2_inp;
                 while(true) {
-                    // get input from buttons... waiting to start the game
-                    // if (specific input from button) {
-                    //     game_state.mode == LED_FLASH;
-                    //     break; 
-                    // }
+                    int b0_inp = gpiod_line_get_value(game_state->button_lines[0]);
+                    int b2_inp = gpiod_line_get_value(game_state->button_lines[2]);
+
+                    if (b0_inp == 0 && b2_inp == 0) {
+                        game_state.mode == LED_FLASH;
+                        break;
+                    }
+                    
+                    usleep(INPUT_READ_DELAY * 2);
                 }
                 break;
             case LED_FLASH:
