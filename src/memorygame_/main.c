@@ -31,7 +31,7 @@ void initialise(game_state_t *game_state) {
         game_state->led_lines[i] =  gpiod_chip_get_line(chip, led_pins[i]);
         assert(game_state->led_lines[i] != NULL);
 
-        gpiod_line_request_output(game_state->led_lines[i], "memory game", 1); //CHANGE T0 0
+        gpiod_line_request_output(game_state->led_lines[i], "memory game", 0); 
         gpiod_line_request_input_flags(game_state->button_lines[i], "memory game", GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP);
     }
 
