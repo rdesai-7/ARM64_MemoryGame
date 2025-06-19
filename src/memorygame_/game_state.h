@@ -28,5 +28,7 @@ typedef struct {
     int led_sequence[MAX_SEQ_LEN];
     int seq_len;
     int user_sequence[MAX_SEQ_LEN];
-    int user_seq_len;
+    int user_seq_len; 
+    struct gpiod_line *led_lines[NUM_LEDS];
+    struct gpiod_line *button_lines[NUM_BUTTONS];
 } game_state_t;
