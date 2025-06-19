@@ -1,10 +1,10 @@
+#include <gpiod.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <stdbool.h>
 #include <unistd.h>
 #include <assert.h>
-#include <gpiod.h>
 #include "game_state.h"
 #include "end_outputs.h"
 #include "button_inputs.h"
@@ -20,7 +20,7 @@ void reset(game_state_t *game_state) {
 }
 
 void initialise(game_state_t *game_state) {
-    reset(&game_state);
+    reset(game_state);
 
     struct gpiod_chip *chip = chip = gpiod_chip_open_by_name(chipname);
 
@@ -38,14 +38,17 @@ void initialise(game_state_t *game_state) {
 }
 
 void success(game_state_t *game_state) {
-    display_success(&game_state);
+    printf("sucess!\n");
+    //display_success(game_state);
+    usleep(FLASH_TIME);
     game_state->mode = LED_FLASH;
     game_state->user_seq_len = 0;
 }
 
 void failure(game_state_t *game_state) {
-    display_failure(&game_state);
-    reset(&game_state);
+    printf("failure :( \n");
+    display_failure(game_state);
+    reset(game_state);
 }
 
 bool check_seq(game_state_t *game_state) {
@@ -67,19 +70,19 @@ void append_to_sequence(game_state_t *game_state) {
     }
     // random number 0 to NUM_BUTTONS-1
     int new_val = rand() % NUM_BUTTONS;  
+    //printf("I JUST MADE A RANDOM NUMBER, HERE IT IS %d\n", new_val);
     game_state->led_sequence[game_state->seq_len] = new_val;
     game_state->seq_len++;
 }
 
-void flash_led_seq(game_state_t *game_state) {
-    for (int i = 0; i < game_state->seq_len; i++) {
-        int led_num = game_state->led_sequence[i];
-        flash_led(led_num, &game_state);
-    }
-}
-
 int main(int argc, char *argv[]) {
-    srand(time(NULL));
+    printf("lets play MEMSET! \n");
+    //srand(time(NULL));
+
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    srand(ts.tv_nsec ^ ts.tv_sec);
+
 
     // initialise state
     game_state_t game_state;
@@ -87,38 +90,53 @@ int main(int argc, char *argv[]) {
 
     while(true) {
         switch(game_state.mode){
-            case IDLE:
+            case IDLE: {
                 int b0_inp, b2_inp;
                 while(true) {
-                    int b0_inp = gpiod_line_get_value(game_state.button_lines[0]);
-                    int b2_inp = gpiod_line_get_value(game_state.button_lines[2]);
+                    b0_inp = gpiod_line_get_value(game_state.button_lines[0]);
+                    b2_inp = gpiod_line_get_value(game_state.button_lines[2]);
 
                     if (b0_inp == 0 && b2_inp == 0) {
-                        game_state.mode == LED_FLASH;
+                        game_state.mode = LED_FLASH;
                         break;
                     }
                     
                     usleep(INPUT_READ_DELAY * 2);
                 }
                 break;
+            }
             case LED_FLASH:
+                printf("mode: LED_FLASH\n");
+                usleep(FLASH_TIME);
                 // appends a random number 0..NUM_BUTTONS-1 to the sequence, incrementing seq_len
                 append_to_sequence(&game_state);
+                printf("LED sequence: ");
+                for (int i = 0; i < game_state.seq_len; i++) {
+                    printf("%d, ",game_state.led_sequence[i]);
+                }
+                printf("\n");
                 flash_led_seq(&game_state);
                 game_state.mode = PLAYER_TURN;
                 break;
             case PLAYER_TURN:
+                printf("mode: PLAYER_TURN\n");
                 // optional: user can time-out if no input for X seconds
 
                 get_user_sequence_input(&game_state); // get seq_len button inputs from user, store this in user_sequence
 
+                printf("USER sequence: ");
+                for (int i = 0; i < game_state.user_seq_len; i++) {
+                    printf("%d, ",game_state.user_sequence[i]);
+                }
+                printf("\n");
+
                 bool success_flag = check_seq(&game_state);
                 if (success_flag) {
                     // handle success
-                    success();
+                    success(&game_state);
                 } else {
                     // handle failure
-                    failure();
+                    failure(&game_state);
                 }
                 break;
         }

@@ -2,7 +2,8 @@
 CC      ?= gcc
 CFLAGS  ?= -std=c17 -g \
             -D_POSIX_SOURCE -D_DEFAULT_SOURCE \
-            -Wall -Werror -pedantic
+            -Wall -Werror -pedantic 
+LDFLAGS = -lgpiod
 
 # Executable target
 TARGET = memory_game
@@ -19,7 +20,7 @@ all: $(TARGET)
 
 # Build the emulator executable
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Generic rule to compile .c to .o
 %.o: %.c

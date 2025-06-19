@@ -25,6 +25,7 @@ void get_user_sequence_input(game_state_t *game_state) {
                 game_state->user_sequence[game_state->user_seq_len++] = i;
                 
                 usleep(DEBOUNCE_DELAY);
+                // break; break to avoid multiple reads
             }
             prev_button_inps[i] = button_inps[i];
         }
