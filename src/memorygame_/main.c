@@ -38,7 +38,7 @@ void initialise(game_state_t *game_state) {
 }
 
 void success(game_state_t *game_state) {
-    printf("sucess!\n");
+    printf("success!\n");
     //display_success(game_state);
     usleep(FLASH_TIME);
     game_state->mode = LED_FLASH;
@@ -80,7 +80,7 @@ void append_to_sequence(game_state_t *game_state) {
 }
 
 int main(int argc, char *argv[]) {
-    printf("lets play MEMSET! \n");
+    printf("lets play MEMSET! Press Ctrl+C to exit.\n");
     //srand(time(NULL));
 
     struct timespec ts;
@@ -96,6 +96,7 @@ int main(int argc, char *argv[]) {
         switch(game_state.mode){
             case IDLE: {
                 int b0_inp, b2_inp;
+                printf("mode: IDLE\n");
                 while(true) {
                     b0_inp = gpiod_line_get_value(game_state.button_lines[0]);
                     b2_inp = gpiod_line_get_value(game_state.button_lines[2]);

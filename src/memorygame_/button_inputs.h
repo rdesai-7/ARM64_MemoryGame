@@ -2,6 +2,7 @@
 #define BUTTON_INPUTS_H
 
 #include <stdio.h>
+#include <sys/time.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>

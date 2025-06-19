@@ -9,6 +9,7 @@
 #define INPUT_READ_DELAY 10000
 #define SUCCESS_LED_NUM 0
 #define FAILURE_LED_NUM 2
+#define TIMEOUT 3
 
 #define L0_PIN 26
 #define B0_PIN 4
