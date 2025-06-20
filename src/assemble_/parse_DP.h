@@ -43,14 +43,9 @@ extern uint32_t bit_logic_assembly(char** tokens, int token_count, ARM_STATE *st
 extern uint32_t assemble_add_sub_instruction(char** tokens, int token_count, ARM_STATE *state);
 extern uint32_t mov_wide_assembly(char** tokens, int token_count, ARM_STATE *state);
 
-extern uint32_t cmp_assembly(char** tokens, int token_count, ARM_STATE *state);
-extern uint32_t cmn_assembly(char** tokens, int token_count, ARM_STATE *state);
-extern uint32_t neg_assembly(char** tokens, int token_count, ARM_STATE *state);
-extern uint32_t negs_assembly(char** tokens, int token_count, ARM_STATE *state);
-extern uint32_t tst_assembly(char** tokens, int token_count, ARM_STATE *state);
-extern uint32_t mvn_assembly(char** tokens, int token_count, ARM_STATE *state);
-extern uint32_t mov_assembly(char** tokens, int token_count, ARM_STATE *state);
-extern uint32_t mul_assembly(char** tokens, int token_count, ARM_STATE *state);
-extern uint32_t mneg_assembly(char** tokens, int token_count, ARM_STATE *state);
+extern uint32_t parse_add_sub_alias(char** tokens, int token_count, ARM_STATE *state);
+extern uint32_t parse_compare(char** tokens, int token_count, ARM_STATE *state);
+extern uint32_t parse_mov_alias(char** tokens, int token_count, ARM_STATE *state);
+extern uint32_t parse_mul_alias(char** tokens, int token_count, ARM_STATE *state);
 
 #endif

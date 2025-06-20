@@ -9,11 +9,12 @@
 #include "pass_one.h"
 #include "pass_two.h"
 
-void initialise( ARM_STATE *state, int numInstructions, SymbolTable_t st) {
+void initialise(ARM_STATE *state, int numInstructions, SymbolTable_t st) {
   state->binaryInstructions = malloc(numInstructions * sizeof(uint32_t));
-  state->numInstructions = numInstructions;
-  state->currAddress     = 0x0;
-  state->symbolTable     = st;
+  assert(state->binaryInstructions != NULL);
+  state->numInstructions    = numInstructions;
+  state->currAddress        = 0x0;
+  state->symbolTable        = st;
 }
 
 void write_binary(const char *filename, ARM_STATE *state) {
