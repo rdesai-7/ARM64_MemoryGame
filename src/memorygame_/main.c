@@ -39,8 +39,6 @@ void initialise(game_state_t *game_state) {
 
 void success(game_state_t *game_state) {
     printf("success!\n");
-    //display_success(game_state);
-    usleep(FLASH_TIME);
     game_state->mode = LED_FLASH;
     game_state->user_seq_len = 0;
 }
@@ -112,7 +110,7 @@ int main(int argc, char *argv[]) {
             }
             case LED_FLASH:
                 printf("mode: LED_FLASH\n");
-                usleep(FLASH_TIME);
+                usleep(FLASH_TIME * 2);
                 // appends a random number 0..NUM_BUTTONS-1 to the sequence, incrementing seq_len
                 append_to_sequence(&game_state);
 
@@ -123,7 +121,6 @@ int main(int argc, char *argv[]) {
                 break;
             case PLAYER_TURN:
                 printf("mode: PLAYER_TURN\n");
-                // optional: user can time-out if no input for X seconds
 
                 if (get_user_sequence_input(&game_state) && check_seq(&game_state)) {
                     success(&game_state);

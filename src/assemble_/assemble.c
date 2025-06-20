@@ -42,6 +42,7 @@ int main(int argc, char **argv) {
   bool pass_one = run_pass_one(input_filename, symbol_table, &program_size);
   if (!pass_one) {
     fprintf(stderr, "Error running first pass");
+    destroySymbolTable(symbol_table);
     return EXIT_FAILURE;
   }
 
@@ -54,6 +55,8 @@ int main(int argc, char **argv) {
   bool pass_two = run_pass_two(input_filename, &state);
   if (!pass_two) {
     fprintf(stderr, "Error running second pass");
+    destroySymbolTable(symbol_table);
+    free(state.binaryInstructions);
     return EXIT_FAILURE;
   }
   

@@ -5,10 +5,8 @@
 #define NUM_BUTTONS 6
 #define NUM_LEDS NUM_BUTTONS
 #define FLASH_TIME 300000
-#define DEBOUNCE_DELAY 50000     // 200000 
+#define DEBOUNCE_DELAY 50000  
 #define INPUT_READ_DELAY 10000
-#define SUCCESS_LED_NUM 2
-#define FAILURE_LED_NUM 5
 #define TIMEOUT 3
 
 #define L0_PIN 26 //red
