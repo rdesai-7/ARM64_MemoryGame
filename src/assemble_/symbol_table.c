@@ -1,6 +1,6 @@
 #include "symbol_table.h"
 
-#define INITIAL_CAP 8
+#define INITIAL_CAP 1
 
 SymbolTable_t makeSymbolTable( void ) {
     SymbolTable_t new = malloc(sizeof(struct SymbolTable_t));
