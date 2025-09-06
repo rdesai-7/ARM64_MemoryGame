@@ -1,5 +1,5 @@
 # ARM64 Emulator, Assembler, and Memory Game
-In this project we have developed an emulator and assembler for a subset of the ARMv8 AArch64 instruction set, written entirely in C. As an extension, we created a memory training game on a Raspberry Pi. Our game was focussed on supporting and strengthening the cognitive health of individuals, in particular those suffering from dementia. Developed in a group of 4, this university project culminated in a presentation to our professor and earned a final grade of 100%.
+This project features a custom emulator and assembler for a subset of the ARMv8 AArch64 instruction set, written entirely in C. As a hardware extension, we created an interactive memory training game on a Raspberry Pi. Our game was designed to support and strengthen the cognitive health of individuals, particularly those affected by dementia. Developed in a group of 4, this university project culminated in a presentation to our professor and earned a final grade of 100%.
 
 ## Overview 📖
 
@@ -13,36 +13,53 @@ In an effort to support cognitive health and dementia prevention, we wanted to s
 
 During our iterative development process, we worked towards building a game that was interactive, intuitive, and accessible for all. Take a look at our documentation for more details on the project.
 
-## Tech Stack
-Our emulator and assembler were built from stratch in C. Our memory game involved using a Raspberry Pi 3, as well as LEDs, buttons, and a breadboard. We also used the GPIOD library to enable our code to run on a Raspberry Pi.
+## Documentation 📄
+- [Emulator documentation](doc/interim_report.pdf) 
+- [Assembler and Memory Game documentation](doc/final_report.pdf)
 
-## Full Documentation
-Read documentation for our emulator [here](doc/interim_report.pdf) 
+## Built With 🛠️
+- **Languages**: C
+- **Libraries**: GPIOD
+- **Hardware**: Raspberry Pi 3, Breadboards, LEDs, Push Buttons, Resistors
 
-Read documentation for our assembler and memory game [here](doc/final_report.pdf)
+## Usage 🚀
+You will need the following hardware to play this game. We have implemented a scalable design; the number of buttons/LEDs can be changed easily by modifying the `NUM_BUTTONS` constant in the `src/memorygame_/game_state.h` file. By default, this number is 6.
 
-## Usage
-To run the memory game, you will need some hardware. Please note we have implemented a scalable design, making it easy for anyone to change the desired number of LEDs and buttons. By default, it is set to 6, but on line 5 [here](src/memorygame_/game_state.h) you can change that. Scaling the hardware up involves adding more buttons, LEDs, resistors, wires, and possibly breadboards.
+### Prerequisites
+- 1 x Raspberry Pi
+- 2 x Breadboards
+- 6 x Push Buttons
+- 6 x LEDs
+- 6 x Resistors (≥ 220Ω)
+- ~25 x Jumper Wires
 
-**Prerequisites**:
-- 1 Raspberry Pi
-- 2 Breadboards
-- 6 buttons
-- 6 LEDs
-- 6 resistors (&ge; 220&0mega;)
-- ~25 wires (including M2M and M2F)
+To set up the hardware, please refer to images [1](doc/hardware_pic.jpg) and [2](doc/hardware_pic_2.jpg)
 
-To set up the hardware, please refer to [this image](doc/hardware_pic.jpg), and [this too](doc/hardware_pic_2.jpg).
 
-**Instructions**
-1. Clone the repository to your Raspberry Pi
-2. Download the GPIOD library to your Raspberry Pi
-3. cd into src/memorygame_
-4. Run 'make clean'
-5. Run 'make'
-6. Now run './memory_game' and press the two outer buttons together to start playing!
+### Instructions
 
-Scores are displayed in the terminal, and we encourage adjusting the constants in game_state.h to adjust the difficulty!
+1.  **Clone & Setup**
 
-Enjoy improving your cognitive health, and don't hesistate to email me at rohandesai706@gmail.com for any questions!
+    Clone the repository and install the required GPIOD library on your Raspberry Pi.
+    ```bash
+    git clone https://github.com/rdesai-7/ARM64_MemoryGame.git
+    cd ARM64_MemoryGame
+    # Follow official instructions to install the GPIOD library
+    ```
+
+2.  **Configure (Optional)**
+
+    Before compiling, you can navigate to the `src/memorygame_` directory and adjust game settings (like `NUM_BUTTONS` or GPIO pin assignments) in the `game_state.h` file. 
+
+3.  **Compile & Run**
+
+    Use `make` to compile the game. Run the executable and press the two outermost buttons simultaneously to begin playing!
+    ```bash
+    make
+    ./memory_game
+    ```
+
+Scores are displayed in the terminal. We encourage adjusting the constants in `game_state.h` to change the difficulty and gameplay experience!
+
+For any questions, please don't hesitate to email me at rohandesai706@gmail.com. Enjoy!
 
